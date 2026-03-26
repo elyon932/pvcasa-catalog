@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PV Casa | Auth Page</title>
+
+  <!-- Favicon -->
+  <link href="../img/favicon.ico" rel="icon">
+
+  <!-- Customized Auth Page Stylesheet -->
+  <link href="/admin/css/auth.css" rel="stylesheet" type="text/css">
+</head>
+  
+<body>
+  <!-- Auth Page Start -->
+  <div class="login-card">
+    <!-- Image PVCasa -->
+    <img src="../img/logo2.png" alt="Logo PVCasa" class="login-logo">
+    <h2>Admin Page</h2>
+    <form id="login-form">
+      <div class="input-field">
+        <input id="email" type="text" placeholder="Email" required>
+      </div>
+      <div class="input-field">
+        <input id="password" type="password" placeholder="Password" required>
+      </div>
+      <button id="login-btn" type="submit" class="btn">Login</button>
+
+      <!-- Error / status messages -->
+      <div id="login-error" aria-live="polite"></div>
+    </form>
+  </div>
+  <!-- Auth Page End -->
+
+  <!-- JS Auth Script -->
+  <script type="module" src="/admin/js/auth.js"></script>
+</body>
+</html>

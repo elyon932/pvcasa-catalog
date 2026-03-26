@@ -1,0 +1,28 @@
+# PVCasa Catalog Web Application
+
+## Overview
+
+Web application for product catalog management.
+The system is divided into two areas: **client** and **admin**.
+
+## Features
+
+* Product listing and visualization (client)
+* Search and filtering
+* Product creation, editing and deletion (admin)
+* Authentication system for admin access
+
+## Technologies
+
+* HTML, CSS, JavaScript
+* Firebase (Authentication and Database)
+* Nginx (routing)
+
+## Structure
+
+* `client/` → catalog interface for users
+* `admin/` → product management and authentication
+
+## Status
+
+In progress

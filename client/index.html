@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVCasa - Catálogo</title>
+    <link href="../img/favicon.ico" rel="icon">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-top">
+            <div class="logo-area">
+                <img src="../img/logo.png" alt="PV Casa Logo" class="header-logo">
+                <span class="logo-text">PV Casa</span>
+            </div>
+        </div>
+        <div class="search-area">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="O que você procura para sua casa hoje?">
+                <button><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout-container">
+        <aside class="sidebar">
+            <div class="filter-group">
+                <h3>Categorias</h3>
+                <label><input type="checkbox" value="cama"> Cama</label>
+                <label><input type="checkbox" value="mesa"> Mesa</label>
+                <label><input type="checkbox" value="banho"> Banho</label>
+                <label><input type="checkbox" value="decoracao"> Decoração</label>
+            </div>
+
+            <div class="filter-group">
+                <h3>Preço</h3>
+                <label><input type="radio" name="price" value="all" checked> Todos</label>
+                <label><input type="radio" name="price" value="low"> Até R$ 50,00</label>
+                <label><input type="radio" name="price" value="mid"> R$ 50 - R$ 150</label>
+                <label><input type="radio" name="price" value="high"> Acima de R$ 150</label>
+            </div>
+
+            <div class="filter-group">
+                <h3>Tecido</h3>
+                <label><input type="checkbox"> Algodão 100%</label>
+                <label><input type="checkbox"> Percal</label>
+                <label><input type="checkbox"> Microfibra</label>
+                <label><input type="checkbox"> Linho</label>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <div class="products-grid" id="productContainer"></div>
+
+            <div class="load-more-container">
+                <button id="btnLoadMore">Carregar mais produtos</button>
+            </div>
+
+            <footer class="main-footer">
+                <p>&copy; 2026 PV Casa. Todos os direitos reservados.</p>
+                <p>Cama, Mesa e Banho com conforto e qualidade.</p>
+            </footer>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

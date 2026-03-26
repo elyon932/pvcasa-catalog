@@ -1,0 +1,81 @@
+/* Diagonal gradient background */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Center card */
+.login-card {
+  background: #fff;
+  margin: 0 32px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  width: 350px;
+  padding: 40px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.login-card h2 {
+  margin-top: 20px;
+  margin-bottom: 0px;
+  color: #333;
+  font-size: 1.8em;
+}
+
+/* Input fields container */
+.input-field {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+/* Input fields */
+.input-field input {
+  width: 90%;
+  padding: 12px 15px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  font-size: 1em;
+  transition: all 0.3s ease;
+}
+.input-field input:focus {
+  border-color: #FF8C00;
+  box-shadow: 0 0 5px rgba(255, 140, 0, 0.4);
+}
+
+/* Login button */
+.btn {
+  margin-bottom: 25px;
+  background: linear-gradient(135deg, #FFB300, #FF6A00);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  width: 100%;
+  font-size: 1em;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 140, 0, 0.4);
+}
+
+/* Logo styling */
+.login-logo {
+  display: block;
+  margin: 25 auto 0px;
+  width: 100px;
+  height: auto;
+}

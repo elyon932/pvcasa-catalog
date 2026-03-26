@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>PVCasa - Dashboard Admin</title>
+	<link rel="stylesheet" href="/admin/css/dashboard.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+	<header class="admin-header">
+		<div class="header-container">
+			<div class="admin-logo">
+				<img src="../img/logo.png" alt="Logo">
+				<div class="logo-info">
+					<h1>PV Casa</h1>
+					<span>Painel Administrativo</span>
+				</div>
+			</div>
+			<div class="search-box">
+					<i class="fa-solid fa-magnifying-glass"></i>
+					<input type="text" id="dashboardSearch" placeholder="Pesquisar no catálogo...">
+			</div>
+		</div>
+	</header>
+
+	<div class="main-layout">
+		<aside class="form-sidebar">
+			<div class="form-card">
+					<h2><i class="fa-solid fa-plus-circle"></i> Criar Produto</h2>
+					<form id="productForm">
+							<input type="hidden" id="productId">
+							
+							<div class="field-group">
+									<label>Nome do Produto</label>
+									<input type="text" id="name" required placeholder="Ex: Jogo de Cama Percal 400 Fios">
+							</div>
+
+							<div class="field-row">
+									<div class="field-group">
+											<label>Categoria</label>
+											<select id="category" required>
+													<option value="cama">Cama</option>
+													<option value="mesa">Mesa</option>
+													<option value="banho">Banho</option>
+													<option value="decoracao">Decoração</option>
+											</select>
+									</div>
+
+									<div class="field-group">
+											<label>Tecido/Material</label>
+											<select id="fabric">
+													<option value="Nenhum">Nenhum</option>
+													<option value="Algodão 100%">Algodão 100%</option>
+													<option value="Percal">Percal</option>
+													<option value="Microfibra">Microfibra</option>
+													<option value="Linho">Linho</option>
+											</select>
+									</div>
+							</div>
+
+							<div class="field-row">
+									<div class="field-group">
+											<label>Preço Base (R$)</label>
+											<input type="text" id="basePrice" required placeholder="0,00">
+									</div>
+									<div class="field-group">
+											<label>Desconto (%)</label>
+											<input type="text" id="discount" value="0">
+									</div>
+							</div>
+
+							<div class="price-preview" id="pricePreview">
+									Preço Final: <strong>R$ 0,00</strong>
+							</div>
+
+							<div class="field-group">
+									<label>Imagens do Produto</label>
+									<div class="file-input-wrapper">
+											<input type="file" id="imageFiles" multiple accept="image/*">
+											<div class="file-custom-btn"><i class="fa-solid fa-camera"></i> Adicionar Fotos</div>
+									</div>
+									<div id="uploadPreviewContainer" class="upload-preview-grid" style="display: none;"></div>
+							</div>
+
+							<div class="progress-container">
+									<div id="uploadProgress" class="progress-bar"></div>
+							</div>
+
+							<button type="submit" id="btnSubmit" class="btn-primary">Registrar Produto</button>
+							<button type="button" id="btnCancel" class="btn-secondary" style="display: none;">Cancelar</button>
+					</form>
+			</div>
+		</aside>
+
+			<main class="gallery-section">
+				<div class="grid-header">
+					<h3>Produtos no Catálogo</h3>
+					<span id="productCount">0 itens</span>
+				</div>
+				<div class="products-grid" id="adminProductContainer"></div>
+			</main>
+    </div>
+
+	<script type="module" src="/admin/js/dashboard.js"></script>
+
+</body>
+</html>
