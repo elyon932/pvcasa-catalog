@@ -2,26 +2,28 @@
 
 ## Overview
 
-Web application for product catalog management.
-The system is divided into two areas: **client** and **admin**.
+PVCasa is a web application designed for product catalog management, organized into two main areas: a client interface for users and an admin panel for managing products and access.
 
 ## Features
 
-* Product listing and visualization (client)
-* Search and filtering
-* Product creation, editing and deletion (admin)
-* Authentication system for admin access
+### Client
+- Browse and view products
+- Search and apply filters
 
-## Technologies
+### Admin
+- Create, edit, and delete products
+- Authentication system for secure access
 
-* HTML, CSS, JavaScript
-* Firebase (Authentication and Database)
-* Nginx (routing)
+## Tech Stack
 
-## Structure
+- HTML, CSS, JavaScript
+- Firebase (Authentication and Database)
+- Nginx (routing)
 
-* `client/` → catalog interface for users
-* `admin/` → product management and authentication
+## Project Structure
+
+- `client/` — user-facing catalog interface
+- `admin/` — product management and authentication system
 
 ## Status
 
