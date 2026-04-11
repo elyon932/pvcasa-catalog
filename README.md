@@ -1,4 +1,14 @@
+<div align="center">
+
 # PVCasa Catalog Web Application
+
+</div>
+
+<div align="center">
+
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+
+</div>
 
 ## Overview
 
@@ -28,3 +38,8 @@ PVCasa is a web application designed for product catalog management, organized i
 ## Status
 
 In progress
+
+## Author
+
+**Elyon Oliveira dos Santos**  
+Software Developer
