@@ -1,115 +1,57 @@
-// Import the modules
 import { login } from "/admin/js/services/login.js";
 import { checkAuth } from "/admin/js/services/checkAuth.js";
 
-/* =========================================
-   1. CheckAuth Script
-   ========================================= */
+const DASHBOARD_URL = "/admin/dashboard/";
 
-// Check auth state on page Admin load
-checkAuth((user) => {
-  if (user) {
-    window.location.replace("/admin/dashboard/");
-  }
-});
+const ERROR_MESSAGES = {
+  "auth/invalid-email": "E-mail inválido.",
+  "auth/user-disabled": "Este usuário está desativado.",
+  "auth/user-not-found": "Nenhum usuário encontrado com este e-mail.",
+  "auth/wrong-password": "Senha incorreta. Tente novamente.",
+  "auth/invalid-credential": "E-mail ou senha incorretos.",
+  "auth/too-many-requests": "Muitas tentativas. Aguarde alguns minutos.",
+  "auth/network-request-failed": "Falha de conexão. Verifique sua internet.",
+};
 
-/* =========================================
-   2. Authentication Script
-   ========================================= */
-
-// DOM elements
 const form = document.getElementById("login-form");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
-const loginBtn = document.getElementById("login-btn");
-let errorDiv = document.getElementById("login-error");
+const loginButton = document.getElementById("login-btn");
+const messageBox = document.getElementById("login-error");
 
-// Create errorDiv if it doesn't exist
-if (!errorDiv) {
-	errorDiv = document.createElement("div");
-	errorDiv.id = "login-error";
-	errorDiv.style.color = "#d33";
-	errorDiv.style.marginTop = "10px";
-	errorDiv.style.fontSize = "0.95rem";
+checkAuth((user) => {
+  if (user) window.location.replace(DASHBOARD_URL);
+});
 
-	// Try to append after the button
-	if (loginBtn && loginBtn.parentNode) {
-	loginBtn.parentNode.appendChild(errorDiv);
-	} else if (form) {
-	form.appendChild(errorDiv);
-	}
-}
-
-// Helper: show error or success message
 function showMessage(message, isError = true) {
-	errorDiv.textContent = message;
-	errorDiv.style.color = isError ? "#d33" : "#0a0";
+  messageBox.textContent = message;
+  messageBox.classList.toggle("is-error", isError);
+  messageBox.classList.toggle("is-success", !isError);
 }
 
-// Form submit handler: sign in with email & password
-if (form) {
-	form.addEventListener("submit", async (e) => {
-    	e.preventDefault();
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-		// Get input values
-		const email = emailInput.value.trim();
-		const password = passwordInput.value;
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
 
-		// Basic client-side validation
-		if (!email || !password) {
-			showMessage("Please provide both email and password.");
-			return;
-		}
+  if (!email || !password) {
+    showMessage("Informe e-mail e senha.");
+    return;
+  }
 
-		// Disable the button while processing
-		loginBtn.disabled = true;
-		const originalBtnText = loginBtn.textContent;
-		loginBtn.textContent = "Logging in...";
+  loginButton.disabled = true;
+  const originalLabel = loginButton.textContent;
+  loginButton.textContent = "Entrando...";
 
-		// Attempt sign-in
-		try {
-			await login(email, password);
-		
-		// Clear inputs and show success message
-		emailInput.value = "";
-		passwordInput.value = "";
-		showMessage("Login successful — redirecting...", false);
-		
-		// Redirect to dashboard after a short delay	
-		setTimeout(() => {
-        	window.location.href = "/admin/dashboard/";
-      	}, 700);
-
-		// Handle errors
-		} catch (err) {
-			// Clear inputs
-			emailInput.value = "";
-			passwordInput.value = "";
-
-		// Handle common errors
-		switch (err.code) {
-			case "auth/invalid-email":
-				showMessage("Invalid email address.");
-				break;
-			case "auth/user-disabled":
-				showMessage("This user has been disabled.");
-				break;
-			case "auth/user-not-found":
-				showMessage("No user found with this email.");
-				break;
-			case "auth/wrong-password":
-				showMessage("Wrong password. Try again or reset password.");
-				break;
-			default:
-				showMessage("Login failed. Please try again.");
-		}
-
-		// Re-enable button and restore text
-		} finally {
-			loginBtn.disabled = false;
-			loginBtn.textContent = originalBtnText;
-		}
-	});
-} else {
-	console.warn("Login form not found: #login-form");
-}
+  try {
+    await login(email, password);
+    showMessage("Login efetuado. Redirecionando...", false);
+    window.location.replace(DASHBOARD_URL);
+  } catch (error) {
+    passwordInput.value = "";
+    showMessage(ERROR_MESSAGES[error.code] ?? "Não foi possível entrar. Tente novamente.");
+    loginButton.disabled = false;
+    loginButton.textContent = originalLabel;
+  }
+});

@@ -3,37 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PV Casa | Auth Page</title>
-
-  <!-- Favicon -->
-  <link href="../img/favicon.ico" rel="icon">
-
-  <!-- Customized Auth Page Stylesheet -->
-  <link href="/admin/css/auth.css" rel="stylesheet" type="text/css">
+  <meta name="robots" content="noindex, nofollow">
+  <title>PV Casa | Acesso administrativo</title>
+  <link href="/img/favicon.ico" rel="icon">
+  <link href="/admin/css/auth.css" rel="stylesheet">
 </head>
-  
+
 <body>
-  <!-- Auth Page Start -->
-  <div class="login-card">
-    <!-- Image PVCasa -->
-    <img src="../img/logo2.png" alt="Logo PVCasa" class="login-logo">
-    <h2>Admin Page</h2>
-    <form id="login-form">
-      <div class="input-field">
-        <input id="email" type="text" placeholder="Email" required>
-      </div>
-      <div class="input-field">
-        <input id="password" type="password" placeholder="Password" required>
-      </div>
-      <button id="login-btn" type="submit" class="btn">Login</button>
+  <main class="login-card">
+    <img src="/img/logo2.png" alt="PV Casa" class="login-logo" width="100" height="100">
+    <h1>Painel administrativo</h1>
 
-      <!-- Error / status messages -->
-      <div id="login-error" aria-live="polite"></div>
+    <form id="login-form" novalidate>
+      <div class="input-field">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" autocomplete="username" required>
+      </div>
+
+      <div class="input-field">
+        <label for="password">Senha</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+      </div>
+
+      <button id="login-btn" type="submit" class="btn">Entrar</button>
+
+      <p id="login-error" class="form-message" role="status" aria-live="polite"></p>
     </form>
-  </div>
-  <!-- Auth Page End -->
+  </main>
 
-  <!-- JS Auth Script -->
   <script type="module" src="/admin/js/auth.js"></script>
 </body>
 </html>
