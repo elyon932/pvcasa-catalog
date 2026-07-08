@@ -1,71 +1,95 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PVCasa - Catálogo</title>
-    <link href="../img/favicon.ico" rel="icon">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PV Casa | Cama, Mesa e Banho</title>
+  <meta name="description" content="Catálogo PV Casa: cama, mesa, banho e decoração com conforto e qualidade. Consulte disponibilidade pelo WhatsApp.">
+  <meta property="og:title" content="PV Casa | Cama, Mesa e Banho">
+  <meta property="og:description" content="Catálogo de cama, mesa, banho e decoração.">
+  <meta property="og:type" content="website">
+  <link href="/img/favicon.ico" rel="icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/client/css/style.css">
 </head>
 <body>
+  <a class="skip-link" href="#catalog">Ir para o catálogo</a>
 
-    <header class="main-header">
-        <div class="header-top">
-            <div class="logo-area">
-                <img src="../img/logo.png" alt="PV Casa Logo" class="header-logo">
-                <span class="logo-text">PV Casa</span>
-            </div>
+  <header class="main-header">
+    <div class="header-inner">
+      <div class="logo-area">
+        <img src="/img/logo.png" alt="" class="header-logo" width="56" height="56">
+        <span class="logo-text">PV Casa</span>
+      </div>
+
+      <form class="search-area" id="searchForm" role="search">
+        <label class="visually-hidden" for="searchInput">Buscar produtos</label>
+        <div class="search-bar">
+          <input type="search" id="searchInput" placeholder="O que você procura para sua casa hoje?" autocomplete="off">
+          <button type="submit" aria-label="Buscar">Buscar</button>
         </div>
-        <div class="search-area">
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="O que você procura para sua casa hoje?">
-                <button><i class="fa-solid fa-magnifying-glass"></i></button>
-            </div>
-        </div>
-    </header>
-
-    <div class="layout-container">
-        <aside class="sidebar">
-            <div class="filter-group">
-                <h3>Categorias</h3>
-                <label><input type="checkbox" value="cama"> Cama</label>
-                <label><input type="checkbox" value="mesa"> Mesa</label>
-                <label><input type="checkbox" value="banho"> Banho</label>
-                <label><input type="checkbox" value="decoracao"> Decoração</label>
-            </div>
-
-            <div class="filter-group">
-                <h3>Preço</h3>
-                <label><input type="radio" name="price" value="all" checked> Todos</label>
-                <label><input type="radio" name="price" value="low"> Até R$ 50,00</label>
-                <label><input type="radio" name="price" value="mid"> R$ 50 - R$ 150</label>
-                <label><input type="radio" name="price" value="high"> Acima de R$ 150</label>
-            </div>
-
-            <div class="filter-group">
-                <h3>Tecido</h3>
-                <label><input type="checkbox"> Algodão 100%</label>
-                <label><input type="checkbox"> Percal</label>
-                <label><input type="checkbox"> Microfibra</label>
-                <label><input type="checkbox"> Linho</label>
-            </div>
-        </aside>
-
-        <main class="content-area">
-            <div class="products-grid" id="productContainer"></div>
-
-            <div class="load-more-container">
-                <button id="btnLoadMore">Carregar mais produtos</button>
-            </div>
-
-            <footer class="main-footer">
-                <p>&copy; 2026 PV Casa. Todos os direitos reservados.</p>
-                <p>Cama, Mesa e Banho com conforto e qualidade.</p>
-            </footer>
-        </main>
+      </form>
     </div>
+  </header>
 
-    <script src="script.js"></script>
+  <div class="layout-container">
+    <button type="button" class="filters-toggle" id="filtersToggle" aria-expanded="false" aria-controls="filters">
+      Filtros
+    </button>
+
+    <aside class="sidebar" id="filters">
+      <form id="filtersForm">
+        <fieldset class="filter-group">
+          <legend>Categorias</legend>
+          <label><input type="checkbox" name="category" value="cama"> Cama</label>
+          <label><input type="checkbox" name="category" value="mesa"> Mesa</label>
+          <label><input type="checkbox" name="category" value="banho"> Banho</label>
+          <label><input type="checkbox" name="category" value="decoracao"> Decoração</label>
+        </fieldset>
+
+        <fieldset class="filter-group">
+          <legend>Preço</legend>
+          <label><input type="radio" name="price" value="all" checked> Todos</label>
+          <label><input type="radio" name="price" value="low"> Até R$ 50,00</label>
+          <label><input type="radio" name="price" value="mid"> R$ 50,00 a R$ 150,00</label>
+          <label><input type="radio" name="price" value="high"> Acima de R$ 150,00</label>
+        </fieldset>
+
+        <div class="filter-group">
+          <label for="sortSelect">Ordenar por</label>
+          <select id="sortSelect">
+            <option value="name">Nome (A-Z)</option>
+            <option value="price-asc">Menor preço</option>
+            <option value="price-desc">Maior preço</option>
+            <option value="discount">Maior desconto</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn-clear" id="btnClearFilters">Limpar filtros</button>
+      </form>
+    </aside>
+
+    <main class="content-area" id="catalog">
+      <p class="results-count" id="resultsCount" role="status" aria-live="polite"></p>
+
+      <div class="products-grid" id="productContainer"></div>
+
+      <p class="state-message" id="stateMessage" hidden></p>
+
+      <div class="load-more-container">
+        <button type="button" id="btnLoadMore" hidden>Carregar mais produtos</button>
+      </div>
+    </main>
+  </div>
+
+  <footer class="main-footer">
+    <p class="footer-brand">PV Casa</p>
+    <p>Cama, mesa e banho com conforto e qualidade.</p>
+    <p class="footer-copy">&copy; <span id="footerYear"></span> PV Casa. Todos os direitos reservados.</p>
+  </footer>
+
+  <script type="module" src="/client/js/catalog.js"></script>
 </body>
 </html>
