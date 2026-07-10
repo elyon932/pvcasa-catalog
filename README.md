@@ -18,9 +18,9 @@ Code, filenames, and identifiers are in English. The user interface is in Brazil
 
 **Catalog (`/client`)**
 - Products loaded from Firestore, out-of-stock items hidden
-- Accent-insensitive search, category and price filters, sorting, pagination
+- Accent-insensitive multi-word search, category and price filters, sorting, pagination
+- Order cart persisted in localStorage: multiple products with quantities (capped at stock) sent as a single WhatsApp message
 - Loading, empty, and error states; responsive layout with a mobile filter drawer
-- WhatsApp call-to-action per product
 
 **Admin (`/admin`)**
 - Email/password authentication with a route guard on the dashboard
@@ -61,11 +61,11 @@ Products without images fall back to `img/product-placeholder.svg`.
 
 ## Setup
 
-1. Serve the repository root over HTTP (paths are root-absolute):
+1. Serve the repository root over HTTP (all paths are relative, so any static server or subpath works; ES modules do not run from `file://`):
    ```bash
    npx serve .
    ```
-   The catalog is at `/client/` and the admin panel at `/admin/auth/`.
+   The root redirects to the catalog at `/client/`; the admin panel is at `/admin/auth/`.
 2. In the Firebase console, add the serving domain to **Authentication → Settings → Authorized domains** and create an admin user under **Authentication → Users**.
 3. Publish the security rules from `firestore.rules` and `storage.rules`. They allow public reads of `products` and restrict all writes to authenticated users.
 4. Sign in to the admin panel and use **Importar CSV** with `produtos.csv` to seed the catalog. Re-running the import updates name, price, and stock while preserving manually set categories, discounts, and images.
