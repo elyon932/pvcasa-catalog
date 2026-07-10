@@ -1,6 +1,6 @@
 import { doc, writeBatch } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { db } from "/shared/firebase.js";
-import { finalPriceOf, normalizeText } from "/shared/catalog.js";
+import { db } from "../../shared/firebase.js";
+import { finalPriceOf, normalizeText } from "../../shared/catalog.js";
 
 const BATCH_LIMIT = 400;
 

@@ -1,4 +1,4 @@
-export const PLACEHOLDER_IMAGE = "/img/product-placeholder.svg";
+export const PLACEHOLDER_IMAGE = new URL("../img/product-placeholder.svg", import.meta.url).href;
 
 export const CATEGORIES = [
   { value: "cama", label: "Cama" },

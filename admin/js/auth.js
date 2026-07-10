@@ -1,7 +1,7 @@
-import { login } from "/admin/js/services/login.js";
-import { checkAuth } from "/admin/js/services/checkAuth.js";
+import { login } from "./services/login.js";
+import { checkAuth } from "./services/checkAuth.js";
 
-const DASHBOARD_URL = "/admin/dashboard/";
+const DASHBOARD_URL = "../dashboard/";
 
 const ERROR_MESSAGES = {
   "auth/invalid-email": "E-mail inválido.",

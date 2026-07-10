@@ -15,10 +15,10 @@ import {
   uploadBytes,
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
-import { db, storage } from "/shared/firebase.js";
-import { checkAuth } from "/admin/js/services/checkAuth.js";
-import { logout } from "/admin/js/services/logout.js";
-import { importProducts, parseProductsCsv } from "/admin/js/csv-import.js";
+import { db, storage } from "../../shared/firebase.js";
+import { checkAuth } from "./services/checkAuth.js";
+import { logout } from "./services/logout.js";
+import { importProducts, parseProductsCsv } from "./csv-import.js";
 import {
   categoryLabel,
   escapeHtml,
@@ -26,9 +26,9 @@ import {
   formatCurrency,
   normalizeText,
   PLACEHOLDER_IMAGE,
-} from "/shared/catalog.js";
+} from "../../shared/catalog.js";
 
-const AUTH_URL = "/admin/auth/";
+const AUTH_URL = "../auth/";
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const form = document.getElementById("productForm");

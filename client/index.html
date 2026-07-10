@@ -8,11 +8,11 @@
   <meta property="og:title" content="PV Casa | Cama, Mesa e Banho">
   <meta property="og:description" content="Catálogo de cama, mesa, banho e decoração.">
   <meta property="og:type" content="website">
-  <link href="/img/favicon.ico" rel="icon">
+  <link href="../img/favicon.ico" rel="icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/client/css/style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <a class="skip-link" href="#catalog">Ir para o catálogo</a>
@@ -20,7 +20,7 @@
   <header class="main-header">
     <div class="header-inner">
       <div class="logo-area">
-        <img src="/img/logo.png" alt="" class="header-logo" width="56" height="56">
+        <img src="../img/logo.png" alt="" class="header-logo" width="56" height="56">
         <span class="logo-text">PV Casa</span>
       </div>
 
@@ -90,6 +90,34 @@
     <p class="footer-copy">&copy; <span id="footerYear"></span> PV Casa. Todos os direitos reservados.</p>
   </footer>
 
-  <script type="module" src="/client/js/catalog.js"></script>
+  <div class="cart-overlay" id="cartOverlay" hidden></div>
+
+  <aside class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartTitle" hidden>
+    <div class="cart-header">
+      <h2 id="cartTitle">Meu pedido</h2>
+      <button type="button" id="cartClose" class="cart-close" aria-label="Fechar pedido">✕</button>
+    </div>
+
+    <ul class="cart-items" id="cartItems"></ul>
+    <p class="cart-empty" id="cartEmpty">Seu pedido está vazio. Adicione produtos do catálogo.</p>
+
+    <div class="cart-footer" id="cartFooter" hidden>
+      <p class="cart-total">Total: <strong id="cartTotal">R$ 0,00</strong></p>
+      <a id="cartSend" class="btn-whatsapp" href="#" target="_blank" rel="noopener noreferrer">Enviar pedido no WhatsApp</a>
+      <button type="button" id="cartClear" class="btn-clear">Limpar pedido</button>
+    </div>
+  </aside>
+
+  <button type="button" id="cartToggle" class="cart-fab" aria-haspopup="dialog" aria-expanded="false" aria-controls="cartDrawer">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="9" cy="21" r="1"></circle>
+      <circle cx="20" cy="21" r="1"></circle>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+    </svg>
+    <span class="visually-hidden">Abrir pedido</span>
+    <span id="cartCount" class="cart-count" hidden>0</span>
+  </button>
+
+  <script type="module" src="js/catalog.js"></script>
 </body>
 </html>
