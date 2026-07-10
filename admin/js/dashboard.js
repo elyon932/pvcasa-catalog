@@ -15,9 +15,12 @@ import {
   uploadBytes,
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
-import { db, storage } from "../../shared/firebase.js";
-import { checkAuth } from "./services/checkAuth.js";
-import { logout } from "./services/logout.js";
+import {
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+import { auth, db, storage } from "../../shared/firebase.js";
 import { importProducts, parseProductsCsv } from "./csv-import.js";
 import {
   categoryLabel,
@@ -64,7 +67,7 @@ let objectUrls = [];
 let searchTerm = "";
 let unsubscribe = null;
 
-checkAuth((user) => {
+onAuthStateChanged(auth, (user) => {
   if (!user) {
     unsubscribe?.();
     window.location.replace(AUTH_URL);
@@ -385,7 +388,7 @@ searchInput.addEventListener("input", (event) => {
 });
 
 logoutButton.addEventListener("click", async () => {
-  await logout();
+  await signOut(auth);
   window.location.replace(AUTH_URL);
 });
 

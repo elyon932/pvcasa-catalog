@@ -1,5 +1,8 @@
-import { login } from "./services/login.js";
-import { checkAuth } from "./services/checkAuth.js";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { auth } from "../../shared/firebase.js";
 
 const DASHBOARD_URL = "../dashboard/";
 
@@ -19,7 +22,7 @@ const passwordInput = document.getElementById("password");
 const loginButton = document.getElementById("login-btn");
 const messageBox = document.getElementById("login-error");
 
-checkAuth((user) => {
+onAuthStateChanged(auth, (user) => {
   if (user) window.location.replace(DASHBOARD_URL);
 });
 
@@ -45,7 +48,7 @@ form.addEventListener("submit", async (event) => {
   loginButton.textContent = "Entrando...";
 
   try {
-    await login(email, password);
+    await signInWithEmailAndPassword(auth, email, password);
     showMessage("Login efetuado. Redirecionando...", false);
     window.location.replace(DASHBOARD_URL);
   } catch (error) {
