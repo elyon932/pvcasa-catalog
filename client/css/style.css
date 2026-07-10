@@ -19,6 +19,10 @@
   margin: 0;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   background: var(--bg-body);
   color: var(--text);
@@ -370,6 +374,255 @@ img {
 
 .btn-whatsapp:hover {
   filter: brightness(1.08);
+}
+
+.btn-add {
+  display: block;
+  width: 100%;
+  padding: 11px;
+  background: linear-gradient(135deg, var(--orange), var(--wood));
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.btn-add:hover {
+  filter: brightness(1.08);
+}
+
+.btn-add.is-active {
+  background: var(--surface);
+  color: var(--wood);
+  box-shadow: inset 0 0 0 2px var(--copper);
+}
+
+.cart-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 90;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  background: var(--wood);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(45, 27, 14, 0.35);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.cart-fab:hover {
+  background: var(--copper);
+  transform: translateY(-2px);
+}
+
+.cart-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--orange);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  background: rgba(45, 27, 14, 0.45);
+}
+
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  width: min(100%, 400px);
+  background: var(--surface);
+  box-shadow: -12px 0 35px rgba(45, 27, 14, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-header h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.2rem;
+  color: var(--wood);
+}
+
+.cart-close {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.cart-close:hover {
+  color: var(--text);
+  background: var(--bg-body);
+}
+
+.cart-items {
+  list-style: none;
+  padding: 0 20px;
+  margin: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.cart-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-item img {
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #f3efe9;
+  flex-shrink: 0;
+}
+
+.cart-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cart-item-name {
+  font-size: 0.84rem;
+  line-height: 1.35;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cart-item-price {
+  font-weight: 700;
+  color: var(--wood);
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+}
+
+.cart-qty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cart-qty span {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.qty-down,
+.qty-up {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.qty-down:hover,
+.qty-up:hover:not(:disabled) {
+  border-color: var(--copper);
+  color: var(--wood);
+}
+
+.qty-up:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cart-item-remove {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.cart-item-remove:hover {
+  color: #c0392b;
+}
+
+.cart-empty {
+  padding: 3rem 20px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.cart-footer {
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  margin-bottom: 14px;
+}
+
+.cart-total strong {
+  font-size: 1.15rem;
+  color: var(--wood);
+}
+
+.cart-footer .btn-whatsapp {
+  background: #1e8449;
+  margin-bottom: 10px;
+}
+
+.cart-footer .btn-clear {
+  margin-top: 0;
+}
+
+body.cart-locked {
+  overflow: hidden;
 }
 
 .skeleton {
