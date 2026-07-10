@@ -27,9 +27,7 @@ export function createCart(onChange) {
 
   return {
     entries: () => Object.entries(items),
-    quantityOf: (id) => items[id] ?? 0,
     has: (id) => id in items,
-    size: () => Object.values(items).reduce((total, qty) => total + qty, 0),
     add(id) {
       items[id] = (items[id] ?? 0) + 1;
       persist();

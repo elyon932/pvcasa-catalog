@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com; base-uri 'self'; form-action 'self'; object-src 'none'">
   <title>PV Casa | Cama, Mesa e Banho</title>
   <meta name="description" content="Catálogo PV Casa: cama, mesa, banho e decoração com conforto e qualidade. Consulte disponibilidade pelo WhatsApp.">
   <meta property="og:title" content="PV Casa | Cama, Mesa e Banho">
@@ -36,28 +37,45 @@
 
   <div class="layout-container">
     <button type="button" class="filters-toggle" id="filtersToggle" aria-expanded="false" aria-controls="filters">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="4" y1="6" x2="20" y2="6"></line>
+        <line x1="7" y1="12" x2="17" y2="12"></line>
+        <line x1="10" y1="18" x2="14" y2="18"></line>
+      </svg>
       Filtros
+      <span id="filterCount" class="filter-count" hidden></span>
     </button>
 
     <aside class="sidebar" id="filters">
       <form id="filtersForm">
-        <fieldset class="filter-group">
-          <legend>Categorias</legend>
-          <label><input type="checkbox" name="category" value="cama"> Cama</label>
-          <label><input type="checkbox" name="category" value="mesa"> Mesa</label>
-          <label><input type="checkbox" name="category" value="banho"> Banho</label>
-          <label><input type="checkbox" name="category" value="decoracao"> Decoração</label>
-        </fieldset>
+        <details class="filter-group" open>
+          <summary>Categorias</summary>
+          <div class="filter-options">
+            <label><input type="checkbox" name="category" value="cama"> Cama</label>
+            <label><input type="checkbox" name="category" value="mesa"> Mesa</label>
+            <label><input type="checkbox" name="category" value="banho"> Banho</label>
+            <label><input type="checkbox" name="category" value="decoracao"> Decoração</label>
+          </div>
+        </details>
 
-        <fieldset class="filter-group">
-          <legend>Preço</legend>
-          <label><input type="radio" name="price" value="all" checked> Todos</label>
-          <label><input type="radio" name="price" value="low"> Até R$ 50,00</label>
-          <label><input type="radio" name="price" value="mid"> R$ 50,00 a R$ 150,00</label>
-          <label><input type="radio" name="price" value="high"> Acima de R$ 150,00</label>
-        </fieldset>
+        <details class="filter-group" open>
+          <summary>Preço</summary>
+          <div class="filter-options">
+            <label><input type="radio" name="price" value="all" checked> Todos</label>
+            <label><input type="radio" name="price" value="low"> Até R$ 50,00</label>
+            <label><input type="radio" name="price" value="mid"> R$ 50,00 a R$ 150,00</label>
+            <label><input type="radio" name="price" value="high"> Acima de R$ 150,00</label>
+          </div>
+        </details>
 
-        <div class="filter-group">
+        <button type="button" class="btn-clear" id="btnClearFilters">Limpar filtros</button>
+      </form>
+    </aside>
+
+    <main class="content-area" id="catalog">
+      <div class="catalog-toolbar">
+        <p class="results-count" id="resultsCount" role="status" aria-live="polite"></p>
+        <div class="sort-control">
           <label for="sortSelect">Ordenar por</label>
           <select id="sortSelect">
             <option value="name">Nome (A-Z)</option>
@@ -66,17 +84,15 @@
             <option value="discount">Maior desconto</option>
           </select>
         </div>
-
-        <button type="button" class="btn-clear" id="btnClearFilters">Limpar filtros</button>
-      </form>
-    </aside>
-
-    <main class="content-area" id="catalog">
-      <p class="results-count" id="resultsCount" role="status" aria-live="polite"></p>
+      </div>
 
       <div class="products-grid" id="productContainer"></div>
 
-      <p class="state-message" id="stateMessage" hidden></p>
+      <p class="state-message" id="stateMessage">O catálogo não pôde ser iniciado. Acesse o site por um endereço http (servidor web), não como arquivo local.</p>
+      <noscript><p class="state-message">Ative o JavaScript para ver o catálogo.</p></noscript>
+      <div class="state-action-container">
+        <button type="button" id="stateAction" class="btn-clear state-action" hidden>Limpar filtros e busca</button>
+      </div>
 
       <div class="load-more-container">
         <button type="button" id="btnLoadMore" hidden>Carregar mais produtos</button>

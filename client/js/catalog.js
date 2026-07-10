@@ -32,6 +32,8 @@ const SORTERS = {
 
 const container = document.getElementById("productContainer");
 const stateMessage = document.getElementById("stateMessage");
+const stateAction = document.getElementById("stateAction");
+const filterCount = document.getElementById("filterCount");
 const resultsCount = document.getElementById("resultsCount");
 const loadMoreButton = document.getElementById("btnLoadMore");
 const searchForm = document.getElementById("searchForm");
@@ -61,9 +63,10 @@ let visibleCount = PAGE_SIZE;
 
 const cart = createCart(renderCart);
 
-function showState(message) {
+function showState(message, { clearable = false } = {}) {
   stateMessage.textContent = message;
   stateMessage.hidden = !message;
+  stateAction.hidden = !clearable;
 }
 
 function renderSkeletons() {
@@ -168,8 +171,14 @@ function buildProductCard(product) {
   const addButton = card.querySelector(".btn-add");
   syncAddButton(addButton);
   addButton.addEventListener("click", () => {
-    if (cart.has(product.id)) cart.remove(product.id);
-    else cart.add(product.id);
+    if (cart.has(product.id)) {
+      cart.remove(product.id);
+      return;
+    }
+    cart.add(product.id);
+    cartToggle.classList.remove("bump");
+    void cartToggle.offsetWidth;
+    cartToggle.classList.add("bump");
   });
 
   return card;
@@ -181,6 +190,13 @@ function syncAddButton(button) {
   button.classList.toggle("is-active", inCart);
 }
 
+function updateFilterBadge() {
+  const { term, categories, priceRange } = readFilters();
+  const active = categories.length + (priceRange !== "all" ? 1 : 0) + (term ? 1 : 0);
+  filterCount.textContent = String(active);
+  filterCount.hidden = active === 0;
+}
+
 function applyFilters(resetPagination = true) {
   if (resetPagination) visibleCount = PAGE_SIZE;
 
@@ -189,6 +205,7 @@ function applyFilters(resetPagination = true) {
 
   container.replaceChildren(...page.map(buildProductCard));
   loadMoreButton.hidden = filtered.length <= visibleCount;
+  updateFilterBadge();
 
   if (!products.length) {
     resultsCount.textContent = "";
@@ -198,7 +215,7 @@ function applyFilters(resetPagination = true) {
 
   if (!filtered.length) {
     resultsCount.textContent = "";
-    showState("Nenhum produto encontrado para os filtros selecionados.");
+    showState("Nenhum produto encontrado para os filtros selecionados.", { clearable: true });
     return;
   }
 
@@ -214,15 +231,18 @@ function debounce(callback, delay = 250) {
   };
 }
 
-searchForm.addEventListener("submit", (event) => event.preventDefault());
-searchInput.addEventListener("input", debounce(() => applyFilters()));
-filtersForm.addEventListener("change", () => applyFilters());
-
-clearFiltersButton.addEventListener("click", () => {
+function clearFilters() {
   filtersForm.reset();
   searchInput.value = "";
   applyFilters();
-});
+}
+
+searchForm.addEventListener("submit", (event) => event.preventDefault());
+searchInput.addEventListener("input", debounce(() => applyFilters()));
+filtersForm.addEventListener("change", () => applyFilters());
+sortSelect.addEventListener("change", () => applyFilters());
+clearFiltersButton.addEventListener("click", clearFilters);
+stateAction.addEventListener("click", clearFilters);
 
 loadMoreButton.addEventListener("click", () => {
   visibleCount += PAGE_SIZE;
