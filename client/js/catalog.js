@@ -146,6 +146,41 @@ function readFilters() {
   };
 }
 
+function syncUrl(push = false) {
+  const formData = new FormData(filtersForm);
+  const params = new URLSearchParams();
+  const term = searchInput.value.trim();
+  if (term) params.set("q", term);
+  for (const category of formData.getAll("category")) params.append("cat", category);
+  const price = formData.get("price") ?? "all";
+  if (price !== "all") params.set("price", price);
+  if (sortSelect.value !== "name") params.set("sort", sortSelect.value);
+
+  const query = params.toString();
+  const url = query ? `?${query}` : location.pathname;
+  if (push) history.pushState(null, "", url);
+  else history.replaceState(null, "", url);
+}
+
+function applyUrlParams() {
+  const params = new URLSearchParams(location.search);
+  searchInput.value = params.get("q") ?? "";
+
+  const categories = params.getAll("cat");
+  filtersForm.querySelectorAll('input[name="category"]').forEach((checkbox) => {
+    checkbox.checked = categories.includes(checkbox.value);
+  });
+
+  const price = params.get("price") ?? "all";
+  const priceInput =
+    filtersForm.querySelector(`input[name="price"][value="${price}"]`) ??
+    filtersForm.querySelector('input[name="price"][value="all"]');
+  priceInput.checked = true;
+
+  const sort = params.get("sort");
+  sortSelect.value = sort && sort in SORTERS ? sort : "name";
+}
+
 function getFilteredProducts() {
   const { term, categories, priceRange, sort } = readFilters();
   const matchesPrice = PRICE_RANGES[priceRange] ?? PRICE_RANGES.all;
@@ -256,19 +291,28 @@ function debounce(callback, delay = 250) {
   };
 }
 
+function updateFilters(push) {
+  applyFilters();
+  syncUrl(push);
+}
+
 function clearFilters() {
   filtersForm.reset();
   searchInput.value = "";
-  applyFilters();
+  updateFilters(true);
 }
 
 searchForm.addEventListener("submit", (event) => event.preventDefault());
-searchInput.addEventListener("input", debounce(() => applyFilters()));
+searchInput.addEventListener("input", debounce(() => updateFilters(false)));
 window.addEventListener("resize", debounce(() => applyFilters(false)));
-filtersForm.addEventListener("change", () => applyFilters());
-sortSelect.addEventListener("change", () => applyFilters());
+filtersForm.addEventListener("change", () => updateFilters(true));
+sortSelect.addEventListener("change", () => updateFilters(true));
 clearFiltersButton.addEventListener("click", clearFilters);
 stateAction.addEventListener("click", clearFilters);
+window.addEventListener("popstate", () => {
+  applyUrlParams();
+  applyFilters();
+});
 
 loadMoreButton.addEventListener("click", () => {
   visibleCount += PAGE_SIZE;
@@ -474,5 +518,6 @@ document.addEventListener("keydown", (event) => {
 
 cartClear.addEventListener("click", () => cart.clear());
 
+applyUrlParams();
 renderCart();
 loadProducts();
