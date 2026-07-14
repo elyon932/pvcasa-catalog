@@ -106,6 +106,24 @@
     <p class="footer-copy">&copy; <span id="footerYear"></span> PV Casa. Todos os direitos reservados.</p>
   </footer>
 
+  <div class="product-modal-overlay" id="productModalOverlay" hidden></div>
+
+  <div class="product-modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="pmName" hidden>
+    <button type="button" class="pm-close" id="pmClose" aria-label="Fechar detalhes">✕</button>
+    <div class="pm-gallery">
+      <button type="button" class="pm-nav pm-prev" id="pmPrev" aria-label="Imagem anterior" hidden>‹</button>
+      <img class="pm-image" id="pmImage" src="" alt="" width="480" height="480">
+      <button type="button" class="pm-nav pm-next" id="pmNext" aria-label="Próxima imagem" hidden>›</button>
+      <div class="pm-dots" id="pmDots" hidden></div>
+    </div>
+    <div class="pm-info">
+      <span class="category-tag" id="pmCategory"></span>
+      <h2 class="pm-name" id="pmName"></h2>
+      <div class="card-prices" id="pmPrices"></div>
+      <button type="button" class="btn-add" id="pmAdd"></button>
+    </div>
+  </div>
+
   <div class="cart-overlay" id="cartOverlay" hidden></div>
 
   <aside class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartTitle" hidden>
