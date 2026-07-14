@@ -1,11 +1,11 @@
 import {
-  addDoc,
   collection,
   deleteDoc,
   doc,
   onSnapshot,
   orderBy,
   query,
+  setDoc,
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import {
@@ -21,7 +21,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 import { auth, db, storage } from "../../shared/firebase.js";
-import { importProducts, parseProductsCsv } from "./csv-import.js";
 import {
   categoryLabel,
   escapeHtml,
@@ -55,9 +54,6 @@ const submitButton = document.getElementById("btnSubmit");
 const cancelButton = document.getElementById("btnCancel");
 const searchInput = document.getElementById("dashboardSearch");
 const logoutButton = document.getElementById("btnLogout");
-const importButton = document.getElementById("btnImport");
-const csvInput = document.getElementById("csvFile");
-const importStatus = document.getElementById("importStatus");
 
 let allProducts = [];
 let selectedFiles = [];
@@ -211,18 +207,33 @@ form.addEventListener("submit", async (event) => {
   }
 
   const productId = productIdInput.value;
+  const barcode = barcodeInput.value.trim();
+
+  if (!productId) {
+    if (!barcode) {
+      showFormMessage("Informe o código de barras do produto.", true);
+      return;
+    }
+    if (allProducts.some((product) => product.id === barcode)) {
+      showFormMessage("Já existe um produto com este código de barras.", true);
+      return;
+    }
+  }
+
   submitButton.disabled = true;
   const originalLabel = submitButton.textContent;
   submitButton.textContent = "Sincronizando...";
   showFormMessage("");
 
+  let uploadedImages = [];
+
   try {
-    const uploadedImages = selectedFiles.length ? await uploadSelectedFiles() : [];
+    uploadedImages = selectedFiles.length ? await uploadSelectedFiles() : [];
     const discount = Number(discountInput.value) || 0;
 
     const data = {
       name: nameInput.value.trim(),
-      barcode: barcodeInput.value.trim(),
+      barcode,
       category: categorySelect.value,
       basePrice,
       discount,
@@ -235,13 +246,15 @@ form.addEventListener("submit", async (event) => {
     if (productId) {
       await updateDoc(doc(db, "products", productId), data);
     } else {
-      await addDoc(collection(db, "products"), { ...data, createdAt: Date.now() });
+      await setDoc(doc(db, "products", barcode), { ...data, createdAt: Date.now() });
     }
 
     await deleteImages(removedImages);
     resetForm();
     showFormMessage(productId ? "Produto atualizado." : "Produto registrado.");
   } catch (error) {
+    await deleteImages(uploadedImages);
+    progressBar.style.width = "0%";
     showFormMessage(`Falha ao salvar: ${error.message}`, true);
   } finally {
     submitButton.disabled = false;
@@ -390,48 +403,6 @@ searchInput.addEventListener("input", (event) => {
 logoutButton.addEventListener("click", async () => {
   await signOut(auth);
   window.location.replace(AUTH_URL);
-});
-
-importButton.addEventListener("click", () => csvInput.click());
-
-csvInput.addEventListener("change", async (event) => {
-  const file = event.target.files[0];
-  event.target.value = "";
-  if (!file) return;
-
-  importStatus.hidden = false;
-  importStatus.textContent = "Lendo arquivo...";
-
-  try {
-    const { products, skipped } = parseProductsCsv(await file.text());
-
-    if (!products.length) {
-      importStatus.textContent = "Nenhum produto válido encontrado no arquivo.";
-      return;
-    }
-
-    if (!window.confirm(`Importar ${products.length} produtos? Itens existentes serão atualizados.`)) {
-      importStatus.hidden = true;
-      return;
-    }
-
-    importButton.disabled = true;
-    const existingProducts = new Map(allProducts.map((product) => [product.id, product]));
-
-    await importProducts(products, {
-      existingProducts,
-      onProgress: (written, total) => {
-        importStatus.textContent = `Importando ${written} de ${total} produtos...`;
-      },
-    });
-
-    const skippedNote = skipped.length ? ` ${skipped.length} linha(s) ignorada(s).` : "";
-    importStatus.textContent = `${products.length} produtos importados.${skippedNote}`;
-  } catch (error) {
-    importStatus.textContent = `Falha na importação: ${error.message}`;
-  } finally {
-    importButton.disabled = false;
-  }
 });
 
 updatePricePreview();

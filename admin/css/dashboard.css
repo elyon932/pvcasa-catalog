@@ -136,17 +136,6 @@ body {
   cursor: progress;
 }
 
-.import-status {
-  max-width: 1400px;
-  margin: 1rem auto -1rem;
-  padding: 12px 16px;
-  background: #fff4e6;
-  border: 1px dashed var(--orange);
-  border-radius: 8px;
-  color: var(--wood);
-  font-size: 0.9rem;
-}
-
 .main-layout {
   display: flex;
   max-width: 1400px;

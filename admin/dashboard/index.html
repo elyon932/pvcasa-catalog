@@ -25,14 +25,10 @@
           <label class="visually-hidden" for="dashboardSearch">Pesquisar no catálogo</label>
           <input type="search" id="dashboardSearch" placeholder="Pesquisar no catálogo...">
         </div>
-        <button type="button" id="btnImport" class="btn-ghost">Importar CSV</button>
         <button type="button" id="btnLogout" class="btn-ghost">Sair</button>
-        <input type="file" id="csvFile" accept=".csv,text/csv" hidden>
       </div>
     </div>
   </header>
-
-  <p id="importStatus" class="import-status" role="status" aria-live="polite" hidden></p>
 
   <div class="main-layout">
     <aside class="form-sidebar">
@@ -50,7 +46,7 @@
           <div class="field-row">
             <div class="field-group">
               <label for="barcode">Código de barras</label>
-              <input type="text" id="barcode" inputmode="numeric" maxlength="14" placeholder="Opcional">
+              <input type="text" id="barcode" inputmode="numeric" maxlength="14" required placeholder="Ex: 7891234567890">
             </div>
 
             <div class="field-group">

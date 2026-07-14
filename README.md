@@ -26,7 +26,6 @@ Code, filenames, and identifiers are in English. The user interface is in Brazil
 - Email/password authentication with a route guard on the dashboard
 - Create, edit, and delete products, including multi-image upload to Firebase Storage
 - Stock, barcode, base price, and discount management with live final-price preview
-- CSV import that upserts products by barcode and auto-assigns categories
 
 ## Tech Stack
 
@@ -43,12 +42,12 @@ img/       brand assets and product placeholder
 
 ## Data Model
 
-Collection `products`, document ID is the barcode when available:
+Collection `products`, document ID is the barcode:
 
 | Field | Type | Notes |
 | --- | --- | --- |
 | `name` | string | Product name |
-| `barcode` | string | EAN, optional |
+| `barcode` | string | EAN, required — also used as the document ID |
 | `category` | string | `cama`, `mesa`, `banho`, `decoracao` |
 | `basePrice` | number | Price before discount |
 | `discount` | number | Percentage, 0–99 |
@@ -67,8 +66,8 @@ Products without images fall back to `img/product-placeholder.svg`.
    ```
    The root redirects to the catalog at `/client/`; the admin panel is at `/admin/auth/`.
 2. In the Firebase console, add the serving domain to **Authentication → Settings → Authorized domains** and create an admin user under **Authentication → Users**.
-3. Publish the security rules from `firestore.rules` and `storage.rules`. They allow public reads of `products` and restrict all writes to authenticated users.
-4. Sign in to the admin panel and use **Importar CSV** with `produtos.csv` to seed the catalog. Re-running the import updates name, price, and stock while preserving manually set categories, discounts, and images.
+3. Configure the Firestore and Storage security rules in the Firebase console: allow public reads of `products` and restrict all writes to authorized admin users.
+4. Sign in to the admin panel to manage the catalog.
 
 ## Deployment
 
