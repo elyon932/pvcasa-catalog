@@ -29,6 +29,7 @@ import {
   normalizeText,
   PLACEHOLDER_IMAGE,
 } from "../../shared/catalog.js";
+import { maskMoney, maskPercent, parseMoney } from "../../shared/money.js";
 
 const AUTH_URL = "../auth/";
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -82,20 +83,6 @@ function subscribeToProducts() {
     },
     () => showFormMessage("Não foi possível carregar os produtos.", true),
   );
-}
-
-function parseMoney(value) {
-  const digits = String(value).replace(/\D/g, "");
-  return digits ? Number(digits) / 100 : 0;
-}
-
-function maskMoney(value) {
-  return parseMoney(value).toFixed(2).replace(".", ",");
-}
-
-function maskPercent(value) {
-  const digits = String(value).replace(/\D/g, "");
-  return String(Math.min(Number.parseInt(digits, 10) || 0, 99));
 }
 
 function currentFinalPrice() {
