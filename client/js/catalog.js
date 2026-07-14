@@ -93,7 +93,6 @@ function normalizeProduct(entry) {
     basePrice,
     discount,
     finalPrice: Number(data.finalPrice) || finalPriceOf(basePrice, discount),
-    stock: Number(data.stock) || 0,
     image: primaryImage(data),
     searchIndex: normalizeText(`${data.name} ${categoryLabel(data.category)}`),
   };
@@ -107,7 +106,7 @@ async function loadProducts() {
     const snapshot = await getDocs(query(collection(db, "products"), orderBy("name")));
     products = snapshot.docs
       .map(normalizeProduct)
-      .filter((product) => product.name && product.stock > 0);
+      .filter((product) => product.name);
     productsById = new Map(products.map((product) => [product.id, product]));
     cart.prune(productsById);
     applyFilters();
@@ -292,7 +291,7 @@ function buildCartItem({ product, quantity }) {
       <div class="cart-qty">
         <button type="button" class="qty-down" aria-label="Diminuir quantidade">−</button>
         <span aria-live="polite">${quantity}</span>
-        <button type="button" class="qty-up" aria-label="Aumentar quantidade"${quantity >= product.stock ? " disabled" : ""}>+</button>
+        <button type="button" class="qty-up" aria-label="Aumentar quantidade">+</button>
         <button type="button" class="cart-item-remove" aria-label="Remover ${escapeHtml(product.name)}">Remover</button>
       </div>
     </div>
@@ -302,7 +301,7 @@ function buildCartItem({ product, quantity }) {
     event.target.src = PLACEHOLDER_IMAGE;
   });
   item.querySelector(".qty-down").addEventListener("click", () => cart.setQuantity(product.id, quantity - 1));
-  item.querySelector(".qty-up").addEventListener("click", () => cart.setQuantity(product.id, Math.min(quantity + 1, product.stock)));
+  item.querySelector(".qty-up").addEventListener("click", () => cart.setQuantity(product.id, quantity + 1));
   item.querySelector(".cart-item-remove").addEventListener("click", () => cart.remove(product.id));
   return item;
 }

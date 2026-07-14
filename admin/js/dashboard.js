@@ -1,11 +1,11 @@
 import {
+  addDoc,
   collection,
   deleteDoc,
   doc,
   onSnapshot,
   orderBy,
   query,
-  setDoc,
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import {
@@ -41,11 +41,9 @@ const formTitle = document.getElementById("formTitle");
 const formMessage = document.getElementById("formMessage");
 const productIdInput = document.getElementById("productId");
 const nameInput = document.getElementById("name");
-const barcodeInput = document.getElementById("barcode");
 const categorySelect = document.getElementById("category");
 const basePriceInput = document.getElementById("basePrice");
 const discountInput = document.getElementById("discount");
-const stockInput = document.getElementById("stock");
 const pricePreview = document.getElementById("pricePreview");
 const imageInput = document.getElementById("imageFiles");
 const previewContainer = document.getElementById("uploadPreviewContainer");
@@ -207,19 +205,6 @@ form.addEventListener("submit", async (event) => {
   }
 
   const productId = productIdInput.value;
-  const barcode = barcodeInput.value.trim();
-
-  if (!productId) {
-    if (!barcode) {
-      showFormMessage("Informe o código de barras do produto.", true);
-      return;
-    }
-    if (allProducts.some((product) => product.id === barcode)) {
-      showFormMessage("Já existe um produto com este código de barras.", true);
-      return;
-    }
-  }
-
   submitButton.disabled = true;
   const originalLabel = submitButton.textContent;
   submitButton.textContent = "Sincronizando...";
@@ -233,12 +218,10 @@ form.addEventListener("submit", async (event) => {
 
     const data = {
       name: nameInput.value.trim(),
-      barcode,
       category: categorySelect.value,
       basePrice,
       discount,
       finalPrice: finalPriceOf(basePrice, discount),
-      stock: Math.max(Number.parseInt(stockInput.value, 10) || 0, 0),
       images: [...existingImages, ...uploadedImages],
       updatedAt: Date.now(),
     };
@@ -246,7 +229,7 @@ form.addEventListener("submit", async (event) => {
     if (productId) {
       await updateDoc(doc(db, "products", productId), data);
     } else {
-      await setDoc(doc(db, "products", barcode), { ...data, createdAt: Date.now() });
+      await addDoc(collection(db, "products"), { ...data, createdAt: Date.now() });
     }
 
     await deleteImages(removedImages);
@@ -293,7 +276,6 @@ function renderProducts() {
     ? allProducts.filter(
         (product) =>
           normalizeText(product.name).includes(term) ||
-          normalizeText(product.barcode).includes(term) ||
           normalizeText(categoryLabel(product.category)).includes(term),
       )
     : allProducts;
@@ -306,7 +288,6 @@ function renderProducts() {
 function buildProductCard(product) {
   const images = Array.isArray(product.images) && product.images.length ? product.images : [PLACEHOLDER_IMAGE];
   const discount = Number(product.discount) || 0;
-  const stock = Number(product.stock) || 0;
 
   const card = document.createElement("article");
   card.className = "product-card";
@@ -321,7 +302,6 @@ function buildProductCard(product) {
       <div class="tags">
         <span class="tag tag-${escapeHtml(product.category)}">${escapeHtml(categoryLabel(product.category))}</span>
         ${discount > 0 ? `<span class="tag ${discountClass(discount)}">${discount}% OFF</span>` : ""}
-        <span class="tag ${stock > 0 ? "tag-stock" : "tag-out"}">${stock > 0 ? `${stock} em estoque` : "Sem estoque"}</span>
       </div>
       <h3>${escapeHtml(product.name)}</h3>
       <div class="price-box">
@@ -363,11 +343,9 @@ function editProduct(id) {
 
   productIdInput.value = product.id;
   nameInput.value = product.name ?? "";
-  barcodeInput.value = product.barcode ?? "";
   categorySelect.value = product.category ?? "decoracao";
   basePriceInput.value = (Number(product.basePrice) || 0).toFixed(2).replace(".", ",");
   discountInput.value = String(Number(product.discount) || 0);
-  stockInput.value = String(Number(product.stock) || 0);
 
   existingImages = [...(product.images ?? [])];
   selectedFiles = [];

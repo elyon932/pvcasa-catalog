@@ -548,16 +548,6 @@ select:focus-visible {
   background: #ad1457;
 }
 
-.tag-stock {
-  background: #f3efe9;
-  color: var(--muted);
-}
-
-.tag-out {
-  background: #fdeceb;
-  color: var(--danger);
-}
-
 .discount-low {
   background: #fbc02d;
   color: #2d1b0e;

@@ -43,21 +43,14 @@
             <input type="text" id="name" required maxlength="180" placeholder="Ex: Jogo de cama percal 400 fios">
           </div>
 
-          <div class="field-row">
-            <div class="field-group">
-              <label for="barcode">Código de barras</label>
-              <input type="text" id="barcode" inputmode="numeric" maxlength="14" required placeholder="Ex: 7891234567890">
-            </div>
-
-            <div class="field-group">
-              <label for="category">Categoria</label>
-              <select id="category" required>
-                <option value="cama">Cama</option>
-                <option value="mesa">Mesa</option>
-                <option value="banho">Banho</option>
-                <option value="decoracao">Decoração</option>
-              </select>
-            </div>
+          <div class="field-group">
+            <label for="category">Categoria</label>
+            <select id="category" required>
+              <option value="cama">Cama</option>
+              <option value="mesa">Mesa</option>
+              <option value="banho">Banho</option>
+              <option value="decoracao">Decoração</option>
+            </select>
           </div>
 
           <div class="field-row">
@@ -69,11 +62,6 @@
               <label for="discount">Desconto (%)</label>
               <input type="text" id="discount" inputmode="numeric" value="0">
             </div>
-          </div>
-
-          <div class="field-group">
-            <label for="stock">Estoque</label>
-            <input type="number" id="stock" min="0" step="1" value="0" required>
           </div>
 
           <p class="price-preview" id="pricePreview">Preço final: <strong>R$ 0,00</strong></p>

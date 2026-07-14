@@ -66,37 +66,22 @@ describe("createCart", () => {
   });
 
   describe("prune", () => {
-    it("drops products that are gone or out of stock", () => {
+    it("drops items whose product no longer exists", () => {
       const cart = createCart(onChange);
       cart.add("gone");
-      cart.add("out");
-      cart.add("ok");
+      cart.setQuantity("ok", 4);
 
-      cart.prune(
-        new Map([
-          ["out", { stock: 0 }],
-          ["ok", { stock: 5 }],
-        ]),
-      );
+      cart.prune(new Map([["ok", {}]]));
 
-      expect(Object.fromEntries(cart.entries())).toEqual({ ok: 1 });
+      expect(Object.fromEntries(cart.entries())).toEqual({ ok: 4 });
     });
 
-    it("clamps quantities above the current stock", () => {
-      const cart = createCart(onChange);
-      cart.setQuantity("a", 10);
-
-      cart.prune(new Map([["a", { stock: 3 }]]));
-
-      expect(Object.fromEntries(cart.entries())).toEqual({ a: 3 });
-    });
-
-    it("does not persist when nothing changed", () => {
+    it("does not persist when every item is still valid", () => {
       const cart = createCart(onChange);
       cart.add("a");
       onChange.mockClear();
 
-      cart.prune(new Map([["a", { stock: 5 }]]));
+      cart.prune(new Map([["a", {}]]));
 
       expect(onChange).not.toHaveBeenCalled();
     });
