@@ -45,11 +45,19 @@ export function createCart(onChange) {
       items = {};
       persist();
     },
-    prune(validIds) {
-      const stale = Object.keys(items).filter((id) => !validIds.has(id));
-      if (!stale.length) return;
-      for (const id of stale) delete items[id];
-      persist();
+    prune(products) {
+      let changed = false;
+      for (const [id, quantity] of Object.entries(items)) {
+        const stock = products.get(id)?.stock ?? 0;
+        if (stock <= 0) {
+          delete items[id];
+          changed = true;
+        } else if (quantity > stock) {
+          items[id] = stock;
+          changed = true;
+        }
+      }
+      if (changed) persist();
     },
   };
 }

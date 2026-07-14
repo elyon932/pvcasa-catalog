@@ -8,14 +8,15 @@ import { db } from "../../shared/firebase.js";
 import {
   categoryLabel,
   escapeHtml,
+  finalPriceOf,
   formatCurrency,
   normalizeText,
   PLACEHOLDER_IMAGE,
   primaryImage,
 } from "../../shared/catalog.js";
+import { WHATSAPP_NUMBER } from "../../shared/config.js";
 import { createCart } from "./cart.js";
 
-const WHATSAPP_NUMBER = "5593992274444";
 const PAGE_SIZE = 24;
 const PRICE_RANGES = {
   all: () => true,
@@ -91,7 +92,7 @@ function normalizeProduct(entry) {
     category: data.category ?? "decoracao",
     basePrice,
     discount,
-    finalPrice: Number(data.finalPrice) || basePrice,
+    finalPrice: Number(data.finalPrice) || finalPriceOf(basePrice, discount),
     stock: Number(data.stock) || 0,
     image: primaryImage(data),
     searchIndex: normalizeText(`${data.name} ${categoryLabel(data.category)}`),
@@ -111,7 +112,8 @@ async function loadProducts() {
     cart.prune(productsById);
     applyFilters();
     renderCart();
-  } catch {
+  } catch (error) {
+    console.error("Failed to load catalog:", error);
     container.replaceChildren();
     resultsCount.textContent = "";
     loadMoreButton.hidden = true;
@@ -197,14 +199,20 @@ function updateFilterBadge() {
   filterCount.hidden = active === 0;
 }
 
+function gridColumnCount() {
+  return Math.max(getComputedStyle(container).gridTemplateColumns.split(" ").length, 1);
+}
+
 function applyFilters(resetPagination = true) {
   if (resetPagination) visibleCount = PAGE_SIZE;
 
   const filtered = getFilteredProducts();
-  const page = filtered.slice(0, visibleCount);
+  const columns = gridColumnCount();
+  const rowAlignedCount = Math.ceil(visibleCount / columns) * columns;
+  const page = filtered.slice(0, rowAlignedCount);
 
   container.replaceChildren(...page.map(buildProductCard));
-  loadMoreButton.hidden = filtered.length <= visibleCount;
+  loadMoreButton.hidden = filtered.length <= rowAlignedCount;
   updateFilterBadge();
 
   if (!products.length) {
@@ -239,6 +247,7 @@ function clearFilters() {
 
 searchForm.addEventListener("submit", (event) => event.preventDefault());
 searchInput.addEventListener("input", debounce(() => applyFilters()));
+window.addEventListener("resize", debounce(() => applyFilters(false)));
 filtersForm.addEventListener("change", () => applyFilters());
 sortSelect.addEventListener("change", () => applyFilters());
 clearFiltersButton.addEventListener("click", clearFilters);
@@ -327,7 +336,31 @@ cartToggle.addEventListener("click", () => setCartOpen(cartDrawer.hidden));
 cartClose.addEventListener("click", () => setCartOpen(false));
 cartOverlay.addEventListener("click", () => setCartOpen(false));
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !cartDrawer.hidden) setCartOpen(false);
+  if (cartDrawer.hidden) return;
+
+  if (event.key === "Escape") {
+    setCartOpen(false);
+    return;
+  }
+
+  if (event.key !== "Tab") return;
+
+  const focusable = [...cartDrawer.querySelectorAll("a[href], button:not(:disabled)")].filter(
+    (element) => !element.closest("[hidden]"),
+  );
+  if (!focusable.length) return;
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const outside = !cartDrawer.contains(document.activeElement);
+
+  if (event.shiftKey && (document.activeElement === first || outside)) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && (document.activeElement === last || outside)) {
+    event.preventDefault();
+    first.focus();
+  }
 });
 
 cartClear.addEventListener("click", () => cart.clear());
