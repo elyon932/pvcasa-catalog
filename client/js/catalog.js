@@ -16,6 +16,8 @@ import {
 } from "../../shared/catalog.js";
 import { WHATSAPP_NUMBER } from "../../shared/config.js";
 import { createCart } from "./cart.js";
+import { renderSkeletons, trapFocus } from "./dom.js";
+import { createProductModal } from "./product-modal.js";
 
 const PAGE_SIZE = 24;
 const PRICE_RANGES = {
@@ -55,45 +57,27 @@ const cartFooter = document.getElementById("cartFooter");
 const cartTotal = document.getElementById("cartTotal");
 const cartSend = document.getElementById("cartSend");
 const cartClear = document.getElementById("cartClear");
-const productModal = document.getElementById("productModal");
-const productModalOverlay = document.getElementById("productModalOverlay");
-const pmClose = document.getElementById("pmClose");
-const pmImage = document.getElementById("pmImage");
-const pmPrev = document.getElementById("pmPrev");
-const pmNext = document.getElementById("pmNext");
-const pmDots = document.getElementById("pmDots");
-const pmCategory = document.getElementById("pmCategory");
-const pmName = document.getElementById("pmName");
-const pmPrices = document.getElementById("pmPrices");
-const pmAdd = document.getElementById("pmAdd");
 
 document.getElementById("footerYear").textContent = String(new Date().getFullYear());
 
 let products = [];
 let productsById = new Map();
 let visibleCount = PAGE_SIZE;
-let modalProduct = null;
-let modalImages = [];
-let modalIndex = 0;
-let modalReturnFocus = null;
 
 const cart = createCart(renderCart);
+
+function bumpCart() {
+  cartToggle.classList.remove("bump");
+  void cartToggle.offsetWidth;
+  cartToggle.classList.add("bump");
+}
+
+const productModal = createProductModal({ cart, onAdd: bumpCart });
 
 function showState(message, { clearable = false } = {}) {
   stateMessage.textContent = message;
   stateMessage.hidden = !message;
   stateAction.hidden = !clearable;
-}
-
-function renderSkeletons() {
-  container.replaceChildren(
-    ...Array.from({ length: 10 }, () => {
-      const skeleton = document.createElement("div");
-      skeleton.className = "product-card skeleton";
-      skeleton.setAttribute("aria-hidden", "true");
-      return skeleton;
-    }),
-  );
 }
 
 function normalizeProduct(entry) {
@@ -115,7 +99,7 @@ function normalizeProduct(entry) {
 }
 
 async function loadProducts() {
-  renderSkeletons();
+  renderSkeletons(container);
   showState("");
 
   try {
@@ -220,7 +204,7 @@ function buildProductCard(product) {
     image.src = PLACEHOLDER_IMAGE;
   });
 
-  card.querySelector(".card-image").addEventListener("click", () => openProductModal(product));
+  card.querySelector(".card-image").addEventListener("click", () => productModal.open(product));
 
   const addButton = card.querySelector(".btn-add");
   syncAddButton(addButton);
@@ -230,9 +214,7 @@ function buildProductCard(product) {
       return;
     }
     cart.add(product.id);
-    cartToggle.classList.remove("bump");
-    void cartToggle.offsetWidth;
-    cartToggle.classList.add("bump");
+    bumpCart();
   });
 
   return card;
@@ -382,115 +364,8 @@ function renderCart() {
   cartSend.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(orderMessage(lines, total))}`;
 
   container.querySelectorAll(".btn-add").forEach(syncAddButton);
-  syncModalAdd();
+  productModal.syncAdd();
 }
-
-function galleryImages(product) {
-  return product.images.length ? product.images : [PLACEHOLDER_IMAGE];
-}
-
-function showModalImage(index) {
-  modalIndex = (index + modalImages.length) % modalImages.length;
-  pmImage.src = modalImages[modalIndex];
-  pmDots.querySelectorAll(".pm-dot").forEach((dot, i) => dot.classList.toggle("active", i === modalIndex));
-}
-
-function renderModalDots() {
-  const multiple = modalImages.length > 1;
-  pmPrev.hidden = !multiple;
-  pmNext.hidden = !multiple;
-  pmDots.hidden = !multiple;
-  pmDots.replaceChildren(
-    ...(multiple
-      ? modalImages.map((_, i) => {
-          const dot = document.createElement("span");
-          dot.className = `pm-dot${i === 0 ? " active" : ""}`;
-          return dot;
-        })
-      : []),
-  );
-}
-
-function syncModalAdd() {
-  if (!modalProduct) return;
-  const inCart = cart.has(modalProduct.id);
-  pmAdd.textContent = inCart ? "Remover do pedido" : "Adicionar ao pedido";
-  pmAdd.classList.toggle("is-active", inCart);
-}
-
-function openProductModal(product) {
-  modalProduct = product;
-  modalImages = galleryImages(product);
-  modalReturnFocus = document.activeElement;
-
-  pmCategory.textContent = categoryLabel(product.category);
-  pmName.textContent = product.name;
-  pmPrices.innerHTML = `
-    ${product.discount > 0 ? `<span class="old-price">${escapeHtml(formatCurrency(product.basePrice))}</span>` : ""}
-    <span class="current-price">${escapeHtml(formatCurrency(product.finalPrice))}</span>
-    ${product.discount > 0 ? `<span class="discount-tag">-${product.discount}%</span>` : ""}
-  `;
-  pmImage.alt = product.name;
-  renderModalDots();
-  showModalImage(0);
-  syncModalAdd();
-
-  productModal.hidden = false;
-  productModalOverlay.hidden = false;
-  document.body.classList.add("cart-locked");
-  pmClose.focus();
-}
-
-function closeProductModal() {
-  if (productModal.hidden) return;
-  productModal.hidden = true;
-  productModalOverlay.hidden = true;
-  modalProduct = null;
-  document.body.classList.toggle("cart-locked", !cartDrawer.hidden);
-  if (modalReturnFocus && document.contains(modalReturnFocus)) modalReturnFocus.focus();
-}
-
-function trapFocus(container, event) {
-  const focusable = [...container.querySelectorAll("a[href], button:not(:disabled)")].filter(
-    (element) => !element.closest("[hidden]"),
-  );
-  if (!focusable.length) return;
-
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-  const outside = !container.contains(document.activeElement);
-
-  if (event.shiftKey && (document.activeElement === first || outside)) {
-    event.preventDefault();
-    last.focus();
-  } else if (!event.shiftKey && (document.activeElement === last || outside)) {
-    event.preventDefault();
-    first.focus();
-  }
-}
-
-pmClose.addEventListener("click", closeProductModal);
-productModalOverlay.addEventListener("click", closeProductModal);
-pmPrev.addEventListener("click", () => showModalImage(modalIndex - 1));
-pmNext.addEventListener("click", () => showModalImage(modalIndex + 1));
-pmImage.addEventListener("error", () => {
-  pmImage.src = PLACEHOLDER_IMAGE;
-});
-pmDots.addEventListener("click", (event) => {
-  const index = [...pmDots.querySelectorAll(".pm-dot")].indexOf(event.target);
-  if (index >= 0) showModalImage(index);
-});
-pmAdd.addEventListener("click", () => {
-  if (!modalProduct) return;
-  if (cart.has(modalProduct.id)) {
-    cart.remove(modalProduct.id);
-    return;
-  }
-  cart.add(modalProduct.id);
-  cartToggle.classList.remove("bump");
-  void cartToggle.offsetWidth;
-  cartToggle.classList.add("bump");
-});
 
 function setCartOpen(open) {
   cartDrawer.hidden = !open;
@@ -505,15 +380,14 @@ cartToggle.addEventListener("click", () => setCartOpen(cartDrawer.hidden));
 cartClose.addEventListener("click", () => setCartOpen(false));
 cartOverlay.addEventListener("click", () => setCartOpen(false));
 document.addEventListener("keydown", (event) => {
-  const dialog = !productModal.hidden ? productModal : !cartDrawer.hidden ? cartDrawer : null;
-  if (!dialog) return;
-
-  if (event.key === "Escape") {
-    if (dialog === productModal) closeProductModal();
-    else setCartOpen(false);
-  } else if (event.key === "Tab") {
-    trapFocus(dialog, event);
+  if (productModal.isOpen()) {
+    productModal.handleKeydown(event);
+    return;
   }
+  if (cartDrawer.hidden) return;
+
+  if (event.key === "Escape") setCartOpen(false);
+  else if (event.key === "Tab") trapFocus(cartDrawer, event);
 });
 
 cartClear.addEventListener("click", () => cart.clear());
