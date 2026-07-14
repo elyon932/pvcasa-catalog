@@ -32,6 +32,7 @@ import {
 
 const AUTH_URL = "../auth/";
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const PAGE_SIZE = 24;
 
 const form = document.getElementById("productForm");
 const container = document.getElementById("adminProductContainer");
@@ -52,6 +53,7 @@ const submitButton = document.getElementById("btnSubmit");
 const cancelButton = document.getElementById("btnCancel");
 const searchInput = document.getElementById("dashboardSearch");
 const logoutButton = document.getElementById("btnLogout");
+const loadMoreButton = document.getElementById("btnLoadMore");
 
 let allProducts = [];
 let selectedFiles = [];
@@ -59,6 +61,7 @@ let existingImages = [];
 let removedImages = [];
 let objectUrls = [];
 let searchTerm = "";
+let visibleCount = PAGE_SIZE;
 let unsubscribe = null;
 
 onAuthStateChanged(auth, (user) => {
@@ -270,19 +273,24 @@ function discountClass(discount) {
   return "discount-low";
 }
 
-function renderProducts() {
+function filteredProducts() {
   const term = normalizeText(searchTerm);
-  const products = term
-    ? allProducts.filter(
-        (product) =>
-          normalizeText(product.name).includes(term) ||
-          normalizeText(categoryLabel(product.category)).includes(term),
-      )
-    : allProducts;
+  if (!term) return allProducts;
+  return allProducts.filter(
+    (product) =>
+      normalizeText(product.name).includes(term) ||
+      normalizeText(categoryLabel(product.category)).includes(term),
+  );
+}
+
+function renderProducts() {
+  const products = filteredProducts();
+  const page = products.slice(0, visibleCount);
 
   productCount.textContent = `${products.length} ${products.length === 1 ? "item" : "itens"}`;
   emptyState.hidden = products.length > 0;
-  container.replaceChildren(...products.map(buildProductCard));
+  container.replaceChildren(...page.map(buildProductCard));
+  loadMoreButton.hidden = products.length <= visibleCount;
 }
 
 function buildProductCard(product) {
@@ -375,6 +383,12 @@ async function removeProduct(id) {
 
 searchInput.addEventListener("input", (event) => {
   searchTerm = event.target.value;
+  visibleCount = PAGE_SIZE;
+  renderProducts();
+});
+
+loadMoreButton.addEventListener("click", () => {
+  visibleCount += PAGE_SIZE;
   renderProducts();
 });
 
