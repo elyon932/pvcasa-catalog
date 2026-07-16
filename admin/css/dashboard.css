@@ -24,6 +24,12 @@
   display: none !important;
 }
 
+/* Reserve the scrollbar track so filtering the grid down to a short page
+   does not shift the layout sideways. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -457,8 +463,8 @@ select:focus-visible {
 .carousel-img {
   width: 100%;
   height: 100%;
-  /* Images are stored as squares; contain also keeps legacy uploads uncropped. */
-  object-fit: contain;
+  /* Uploads are already square; cover also fills the frame for legacy images. */
+  object-fit: cover;
 }
 
 .c-nav {
@@ -616,15 +622,14 @@ select:focus-visible {
   aspect-ratio: 1;
   border-radius: 4px;
   overflow: hidden;
-  background: #fff;
-  border: 1px solid var(--border);
+  background: #f3efe9;
 }
 
-/* Mirrors how the image is stored: fitted inside a square, never cropped. */
+/* Mirrors how the image is stored: centre-cropped to fill a square. */
 .preview-item img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .btn-remove-preview {

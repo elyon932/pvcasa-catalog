@@ -23,6 +23,12 @@
   display: none !important;
 }
 
+/* Reserve the scrollbar track at all times: locking the body when the cart or
+   the product modal opens then removes no width, so nothing shifts. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--bg-body);
   color: var(--text);
@@ -374,8 +380,8 @@ img {
 .card-image img {
   width: 100%;
   height: 100%;
-  /* Images are stored as squares; contain also keeps legacy uploads uncropped. */
-  object-fit: contain;
+  /* Uploads are already square; cover also fills the frame for legacy images. */
+  object-fit: cover;
   transition: transform 0.3s ease;
 }
 
