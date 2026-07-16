@@ -17,10 +17,10 @@ function encode(canvas, quality) {
 }
 
 /**
- * Scales the source to fit a TARGET_SIZE square, centers it and re-encodes it
- * as WebP. The leftover margin stays transparent, so nothing is cropped and
- * the card background shows through. Falls back to the original file only when
- * the browser cannot decode or encode it.
+ * Scales the source to cover a TARGET_SIZE square, centers it and re-encodes it
+ * as WebP. The overflow is cropped, so the frame is always filled edge to edge
+ * — no letterboxing, whatever the source ratio. Falls back to the original file
+ * only when the browser cannot decode or encode it.
  */
 export async function optimizeImage(file, { size = TARGET_SIZE, quality = WEBP_QUALITY } = {}) {
   let bitmap;
@@ -35,7 +35,9 @@ export async function optimizeImage(file, { size = TARGET_SIZE, quality = WEBP_Q
     canvas.width = size;
     canvas.height = size;
 
-    const scale = Math.min(size / bitmap.width, size / bitmap.height);
+    // Cover: the smaller side matches the frame, the longer one overflows and
+    // is clipped by the canvas, keeping the subject centred.
+    const scale = Math.max(size / bitmap.width, size / bitmap.height);
     const width = Math.max(1, Math.round(bitmap.width * scale));
     const height = Math.max(1, Math.round(bitmap.height * scale));
 
