@@ -199,7 +199,11 @@ async function uploadSelectedFiles() {
 
     showFormMessage(`Enviando imagem ${index + 1} de ${total}...`);
     const storageRef = ref(storage, `products/${crypto.randomUUID()}.${extension}`);
-    await uploadBytes(storageRef, data, { contentType });
+    // The name is a UUID, so the object never changes: let the CDN keep it.
+    await uploadBytes(storageRef, data, {
+      contentType,
+      cacheControl: "public, max-age=31536000, immutable",
+    });
     urls.push(await getDownloadURL(storageRef));
     progressBar.style.width = `${((index + 1) / total) * 100}%`;
   }
