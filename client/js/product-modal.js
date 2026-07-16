@@ -1,5 +1,6 @@
 import {
   categoryLabel,
+  categorySlug,
   escapeHtml,
   formatCurrency,
   PLACEHOLDER_IMAGE,
@@ -64,6 +65,7 @@ export function createProductModal({ cart, onAdd }) {
     images = galleryImages(entry);
     returnFocus = document.activeElement;
 
+    category.className = `category-tag tag-${categorySlug(entry.category)}`;
     category.textContent = categoryLabel(entry.category);
     name.textContent = entry.name;
     prices.innerHTML = `

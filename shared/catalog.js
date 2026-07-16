@@ -13,6 +13,11 @@ export function categoryLabel(value) {
   return CATEGORY_LABELS.get(value) ?? "Decoração";
 }
 
+// Known category key for styling; keeps the tag colour in sync with the label.
+export function categorySlug(value) {
+  return CATEGORY_LABELS.has(value) ? value : "decoracao";
+}
+
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",

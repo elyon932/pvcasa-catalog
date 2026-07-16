@@ -374,7 +374,8 @@ img {
 .card-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Images are stored as squares; contain also keeps legacy uploads uncropped. */
+  object-fit: contain;
   transition: transform 0.3s ease;
 }
 
@@ -394,11 +395,28 @@ img {
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: var(--copper);
-  background: #fdf3e8;
+  color: var(--white);
+  background: var(--copper);
   border-radius: 20px;
   padding: 3px 10px;
   margin-bottom: 8px;
+}
+
+/* Same category palette as the admin panel, so a tag reads at a glance. */
+.category-tag.tag-cama {
+  background: #5d4037;
+}
+
+.category-tag.tag-mesa {
+  background: #2e7d32;
+}
+
+.category-tag.tag-banho {
+  background: #0277bd;
+}
+
+.category-tag.tag-decoracao {
+  background: #ad1457;
 }
 
 .card-name {

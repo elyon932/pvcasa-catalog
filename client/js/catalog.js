@@ -7,6 +7,7 @@ import {
 import { db } from "../../shared/firebase.js";
 import {
   categoryLabel,
+  categorySlug,
   escapeHtml,
   finalPriceOf,
   formatCurrency,
@@ -188,7 +189,7 @@ function buildProductCard(product) {
       <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" loading="lazy" width="300" height="300">
     </button>
     <div class="card-info">
-      <span class="category-tag">${escapeHtml(categoryLabel(product.category))}</span>
+      <span class="category-tag tag-${categorySlug(product.category)}">${escapeHtml(categoryLabel(product.category))}</span>
       <h2 class="card-name">${escapeHtml(product.name)}</h2>
       <div class="card-prices">
         ${product.discount > 0 ? `<span class="old-price">${escapeHtml(formatCurrency(product.basePrice))}</span>` : ""}
