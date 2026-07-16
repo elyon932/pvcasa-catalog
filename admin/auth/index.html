@@ -11,7 +11,16 @@
 </head>
 
 <body>
-  <main class="login-card">
+  <div class="auth-loading" id="authLoading" role="status">
+    <span class="spinner" aria-hidden="true"></span>
+    <span class="visually-hidden">Verificando autenticação...</span>
+  </div>
+
+  <noscript>
+    <p class="auth-noscript">Ative o JavaScript para acessar o painel administrativo.</p>
+  </noscript>
+
+  <main class="login-card" id="loginCard" hidden>
     <img src="../../img/logo2.png" alt="PV Casa" class="login-logo" width="100" height="100">
     <h1>Painel administrativo</h1>
 

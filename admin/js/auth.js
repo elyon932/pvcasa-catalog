@@ -21,9 +21,19 @@ const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const loginButton = document.getElementById("login-btn");
 const messageBox = document.getElementById("login-error");
+const loading = document.getElementById("authLoading");
+const loginCard = document.getElementById("loginCard");
 
+// The card stays hidden until the session is known: an authenticated admin
+// goes straight to the dashboard without the login form flashing first.
 onAuthStateChanged(auth, (user) => {
-  if (user) window.location.replace(DASHBOARD_URL);
+  if (user) {
+    window.location.replace(DASHBOARD_URL);
+    return;
+  }
+  loading.hidden = true;
+  loginCard.hidden = false;
+  emailInput.focus();
 });
 
 function showMessage(message, isError = true) {

@@ -28,6 +28,56 @@ body {
   color: var(--text);
 }
 
+[hidden] {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Shown until Firebase resolves the session, so the login card never
+   flashes for an already authenticated admin. */
+.auth-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
+}
+
+.auth-noscript {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
 .login-card {
   background: #fff;
   border-radius: 20px;
