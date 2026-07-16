@@ -9,6 +9,10 @@
   --border: #e3ddd6;
   --danger: #c0392b;
   --success: #1e8449;
+  /* Shared height for header controls so the search box and buttons match. */
+  --control-h: 42px;
+  /* Real header height, measured by dashboard.js; the value here is a fallback. */
+  --header-h: 82px;
 }
 
 *,
@@ -36,6 +40,36 @@ body {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* Shown until Firebase resolves the session, so the panel never flashes
+   before an unauthenticated visitor is sent to the login page. */
+.app-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid var(--border);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
 }
 
 .admin-header {
@@ -92,10 +126,20 @@ body {
 }
 
 .search-box {
+  display: flex;
+  align-items: center;
+  height: var(--control-h);
   background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 8px;
-  padding: 8px 14px;
+  padding: 0 14px;
   width: min(100%, 340px);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.search-box:focus-within {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: var(--gold);
 }
 
 .search-box input {
@@ -103,6 +147,8 @@ body {
   border: none;
   color: #fff;
   width: 100%;
+  height: 100%;
+  padding: 0;
   font-size: 0.95rem;
 }
 
@@ -111,18 +157,23 @@ body {
 }
 
 .search-box input:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 4px;
+  outline: none;
 }
 
 .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--control-h);
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
-  padding: 9px 16px;
+  padding: 0 18px;
+  font-family: inherit;
   font-size: 0.9rem;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   transition: background 0.2s ease;
 }
@@ -148,11 +199,17 @@ body {
 .form-sidebar {
   width: 380px;
   flex-shrink: 0;
+  display: flex;
   position: sticky;
-  top: 120px;
+  top: calc(var(--header-h) + 1rem);
+  max-height: calc(100vh - var(--header-h) - 2rem);
 }
 
 .form-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
   background: #fff;
   padding: 1.5rem;
   border-radius: 12px;
@@ -161,9 +218,42 @@ body {
 }
 
 .form-card h2 {
+  flex-shrink: 0;
   font-size: 1.15rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   color: var(--wood);
+}
+
+#productForm {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Only the fields scroll, so the actions below stay reachable on any height. */
+.form-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-right: -6px;
+}
+
+.form-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.form-actions button {
+  flex: 1;
 }
 
 .field-group {
@@ -229,6 +319,18 @@ select:focus-visible {
   border: 2px dashed #ccc3b8;
   color: var(--muted);
   font-size: 0.9rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.file-input-wrapper:hover .file-custom-btn {
+  border-color: var(--copper);
+  color: var(--wood);
+}
+
+.field-hint {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--muted);
 }
 
 #imageFiles {
@@ -248,12 +350,13 @@ select:focus-visible {
 .btn-primary {
   background: var(--orange);
   color: #fff;
-  border: none;
+  /* Transparent border keeps it the same box as .btn-secondary side by side. */
+  border: 1px solid transparent;
   padding: 13px;
+  font-family: inherit;
   font-weight: 700;
   border-radius: 6px;
   cursor: pointer;
-  width: 100%;
   font-size: 0.95rem;
   transition: background 0.2s ease;
 }
@@ -268,15 +371,21 @@ select:focus-visible {
 }
 
 .btn-secondary {
-  background: #6b625a;
-  color: #fff;
-  border: none;
-  padding: 11px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 13px;
   border-radius: 6px;
-  width: 100%;
-  margin-top: 8px;
+  font-family: inherit;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--muted);
+  color: var(--text);
 }
 
 .form-message {
@@ -504,7 +613,7 @@ select:focus-visible {
   height: 6px;
   background: #eee;
   border-radius: 10px;
-  margin: 10px 0;
+  margin: 0 0 10px;
   overflow: hidden;
 }
 
@@ -588,9 +697,17 @@ select:focus-visible {
     flex-direction: column;
   }
 
+  /* Stacked: the card flows with the page, so nothing needs to scroll inside. */
   .form-sidebar {
     width: 100%;
     position: static;
+    max-height: none;
+  }
+
+  .form-scroll {
+    overflow: visible;
+    padding-right: 0;
+    margin-right: 0;
   }
 }
 

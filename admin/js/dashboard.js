@@ -30,11 +30,19 @@ import {
   PLACEHOLDER_IMAGE,
 } from "../../shared/catalog.js";
 import { maskMoney, maskPercent, parseMoney } from "../../shared/money.js";
+import { optimizeImage } from "./image.js";
 
 const AUTH_URL = "../auth/";
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+// Sources are converted to WebP before upload, so the accepted source can be
+// generous; MAX_UPLOAD_BYTES guards what actually reaches Storage.
+const MAX_SOURCE_BYTES = 15 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 const PAGE_SIZE = 24;
 
+const appLoading = document.getElementById("appLoading");
+const appShell = document.getElementById("appShell");
+const adminHeader = document.querySelector(".admin-header");
+const progressContainer = document.getElementById("progressContainer");
 const form = document.getElementById("productForm");
 const container = document.getElementById("adminProductContainer");
 const emptyState = document.getElementById("emptyState");
@@ -65,14 +73,26 @@ let searchTerm = "";
 let visibleCount = PAGE_SIZE;
 let unsubscribe = null;
 
+// The shell stays hidden until the session is known, so an unauthenticated
+// visitor never sees the panel before being sent to the login page.
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     unsubscribe?.();
     window.location.replace(AUTH_URL);
     return;
   }
+  appLoading.hidden = true;
+  appShell.hidden = false;
+  syncHeaderHeight();
   if (!unsubscribe) subscribeToProducts();
 });
+
+// The form sidebar sticks below the header and sizes itself against it.
+function syncHeaderHeight() {
+  document.documentElement.style.setProperty("--header-h", `${adminHeader.offsetHeight}px`);
+}
+
+window.addEventListener("resize", syncHeaderHeight);
 
 function subscribeToProducts() {
   unsubscribe = onSnapshot(
@@ -110,10 +130,10 @@ discountInput.addEventListener("input", (event) => {
 
 imageInput.addEventListener("change", (event) => {
   const files = Array.from(event.target.files);
-  const accepted = files.filter((file) => file.type.startsWith("image/") && file.size <= MAX_IMAGE_BYTES);
+  const accepted = files.filter((file) => file.type.startsWith("image/") && file.size <= MAX_SOURCE_BYTES);
 
   if (accepted.length !== files.length) {
-    showFormMessage("Algumas imagens foram ignoradas (formato inválido ou maiores que 5 MB).", true);
+    showFormMessage("Algumas imagens foram ignoradas (formato inválido ou maiores que 15 MB).", true);
   }
 
   selectedFiles = [...selectedFiles, ...accepted];
@@ -167,15 +187,28 @@ function buildPreviewItem(source, onRemove) {
   return item;
 }
 
+// Each source is converted to WebP, uploaded to Storage, and resolved to its
+// CDN download URL — the URL is what gets indexed on the product document.
 async function uploadSelectedFiles() {
   const urls = [];
+  const total = selectedFiles.length;
+
+  progressContainer.hidden = false;
+  progressBar.style.width = "0%";
 
   for (const [index, file] of selectedFiles.entries()) {
-    const path = `products/${Date.now()}-${crypto.randomUUID()}`;
-    const storageRef = ref(storage, path);
-    await uploadBytes(storageRef, file);
+    showFormMessage(`Otimizando imagem ${index + 1} de ${total}...`);
+    const { data, contentType, extension } = await optimizeImage(file);
+
+    if (data.size > MAX_UPLOAD_BYTES) {
+      throw new Error(`"${file.name}" continua acima de 5 MB após a otimização.`);
+    }
+
+    showFormMessage(`Enviando imagem ${index + 1} de ${total}...`);
+    const storageRef = ref(storage, `products/${crypto.randomUUID()}.${extension}`);
+    await uploadBytes(storageRef, data, { contentType });
     urls.push(await getDownloadURL(storageRef));
-    progressBar.style.width = `${((index + 1) / selectedFiles.length) * 100}%`;
+    progressBar.style.width = `${((index + 1) / total) * 100}%`;
   }
 
   return urls;
@@ -227,9 +260,10 @@ form.addEventListener("submit", async (event) => {
     showFormMessage(productId ? "Produto atualizado." : "Produto registrado.");
   } catch (error) {
     await deleteImages(uploadedImages);
-    progressBar.style.width = "0%";
     showFormMessage(`Falha ao salvar: ${error.message}`, true);
   } finally {
+    progressContainer.hidden = true;
+    progressBar.style.width = "0%";
     submitButton.disabled = false;
     submitButton.textContent = originalLabel;
   }
@@ -244,6 +278,7 @@ function resetForm() {
   cancelButton.hidden = true;
   submitButton.textContent = "Registrar produto";
   formTitle.textContent = "Criar produto";
+  progressContainer.hidden = true;
   progressBar.style.width = "0%";
   renderUploadPreview();
   updatePricePreview();

@@ -10,6 +10,16 @@
   <link rel="stylesheet" href="../css/dashboard.css">
 </head>
 <body>
+  <div class="app-loading" id="appLoading" role="status">
+    <span class="spinner" aria-hidden="true"></span>
+    <span class="visually-hidden">Carregando painel...</span>
+  </div>
+
+  <noscript>
+    <p class="empty-state">Ative o JavaScript para acessar o painel administrativo.</p>
+  </noscript>
+
+  <div id="appShell" hidden>
   <header class="admin-header">
     <div class="header-container">
       <div class="admin-logo">
@@ -38,6 +48,7 @@
         <form id="productForm">
           <input type="hidden" id="productId">
 
+          <div class="form-scroll">
           <div class="field-group">
             <label for="name">Nome do produto</label>
             <input type="text" id="name" required maxlength="180" placeholder="Ex: Jogo de cama percal 400 fios">
@@ -72,17 +83,23 @@
               <input type="file" id="imageFiles" multiple accept="image/*" aria-label="Adicionar fotos do produto">
               <span class="file-custom-btn">Adicionar fotos</span>
             </div>
+            <p class="field-hint">Convertidas para WebP e redimensionadas automaticamente.</p>
             <div id="uploadPreviewContainer" class="upload-preview-grid" hidden></div>
           </div>
-
-          <div class="progress-container">
-            <div id="uploadProgress" class="progress-bar"></div>
           </div>
 
-          <p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
+          <div class="form-footer">
+            <div class="progress-container" id="progressContainer" hidden>
+              <div id="uploadProgress" class="progress-bar"></div>
+            </div>
 
-          <button type="submit" id="btnSubmit" class="btn-primary">Registrar produto</button>
-          <button type="button" id="btnCancel" class="btn-secondary" hidden>Cancelar</button>
+            <p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
+
+            <div class="form-actions">
+              <button type="button" id="btnCancel" class="btn-secondary" hidden>Cancelar</button>
+              <button type="submit" id="btnSubmit" class="btn-primary">Registrar produto</button>
+            </div>
+          </div>
         </form>
       </div>
     </aside>
@@ -98,6 +115,7 @@
         <button type="button" id="btnLoadMore" class="btn-load-more" hidden>Carregar mais</button>
       </div>
     </main>
+  </div>
   </div>
 
   <script type="module" src="../js/dashboard.js"></script>
