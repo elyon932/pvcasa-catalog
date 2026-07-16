@@ -71,13 +71,15 @@ img {
   background: linear-gradient(135deg, var(--wood) 0%, var(--copper) 55%, var(--orange) 100%);
   border-bottom: 3px solid var(--gold);
   color: var(--white);
-  padding: 18px 24px;
+  padding: 18px 0;
   box-shadow: 0 2px 14px rgba(45, 27, 14, 0.18);
 }
 
 .header-inner {
   max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   gap: 28px;
@@ -992,6 +994,10 @@ body.cart-locked {
     display: block;
   }
 
+  .header-inner {
+    padding: 0 16px;
+  }
+
   .search-bar {
     margin-left: 0;
     max-width: none;
@@ -1000,7 +1006,7 @@ body.cart-locked {
 
 @media (max-width: 640px) {
   .main-header {
-    padding: 14px 16px;
+    padding: 14px 0;
   }
 
   .header-inner {
@@ -1050,6 +1056,10 @@ body.cart-locked {
   }
 
   .layout-container {
+    padding: 0 12px;
+  }
+
+  .header-inner {
     padding: 0 12px;
   }
 
