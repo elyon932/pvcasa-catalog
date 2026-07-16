@@ -30,6 +30,8 @@ import {
   PLACEHOLDER_IMAGE,
 } from "../../shared/catalog.js";
 import { maskMoney, maskPercent, parseMoney } from "../../shared/money.js";
+import { debounce } from "../../shared/debounce.js";
+import { gridColumnCount, rowAlignedCount } from "../../shared/grid.js";
 import { optimizeImage } from "./image.js";
 
 const AUTH_URL = "../auth/";
@@ -298,13 +300,17 @@ function filteredProducts() {
 
 function renderProducts() {
   const products = filteredProducts();
-  const page = products.slice(0, visibleCount);
+  const pageSize = rowAlignedCount(visibleCount, gridColumnCount(container));
+  const page = products.slice(0, pageSize);
 
   productCount.textContent = `${products.length} ${products.length === 1 ? "item" : "itens"}`;
   emptyState.hidden = products.length > 0;
   container.replaceChildren(...page.map(buildProductCard));
-  loadMoreButton.hidden = products.length <= visibleCount;
+  loadMoreButton.hidden = products.length <= pageSize;
 }
+
+// The column count changes with the viewport, so re-render to keep rows whole.
+window.addEventListener("resize", debounce(renderProducts));
 
 function buildProductCard(product) {
   const images = Array.isArray(product.images) && product.images.length ? product.images : [PLACEHOLDER_IMAGE];

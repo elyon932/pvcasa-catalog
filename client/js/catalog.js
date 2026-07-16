@@ -16,6 +16,8 @@ import {
   primaryImage,
 } from "../../shared/catalog.js";
 import { WHATSAPP_NUMBER } from "../../shared/config.js";
+import { debounce } from "../../shared/debounce.js";
+import { gridColumnCount, rowAlignedCount } from "../../shared/grid.js";
 import { createCart } from "./cart.js";
 import { renderSkeletons, trapFocus } from "./dom.js";
 import { createProductModal } from "./product-modal.js";
@@ -234,20 +236,15 @@ function updateFilterBadge() {
   filterCount.hidden = active === 0;
 }
 
-function gridColumnCount() {
-  return Math.max(getComputedStyle(container).gridTemplateColumns.split(" ").length, 1);
-}
-
 function applyFilters(resetPagination = true) {
   if (resetPagination) visibleCount = PAGE_SIZE;
 
   const filtered = getFilteredProducts();
-  const columns = gridColumnCount();
-  const rowAlignedCount = Math.ceil(visibleCount / columns) * columns;
-  const page = filtered.slice(0, rowAlignedCount);
+  const pageSize = rowAlignedCount(visibleCount, gridColumnCount(container));
+  const page = filtered.slice(0, pageSize);
 
   container.replaceChildren(...page.map(buildProductCard));
-  loadMoreButton.hidden = filtered.length <= rowAlignedCount;
+  loadMoreButton.hidden = filtered.length <= pageSize;
   updateFilterBadge();
 
   if (!products.length) {
@@ -264,14 +261,6 @@ function applyFilters(resetPagination = true) {
 
   showState("");
   resultsCount.textContent = `${filtered.length} ${filtered.length === 1 ? "produto" : "produtos"}`;
-}
-
-function debounce(callback, delay = 250) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => callback(...args), delay);
-  };
 }
 
 function updateFilters(push) {
