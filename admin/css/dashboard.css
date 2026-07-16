@@ -70,10 +70,12 @@ body {
   }
 }
 
+/* Same vertical rhythm as the client header (padding, logo size, gold rule). */
 .admin-header {
   background: linear-gradient(135deg, var(--wood), var(--copper));
+  border-bottom: 3px solid var(--gold);
   color: #fff;
-  padding: 1rem 0;
+  padding: 18px 0;
   box-shadow: 0 4px 12px rgba(45, 27, 14, 0.15);
   position: sticky;
   top: 0;
@@ -101,7 +103,7 @@ body {
 }
 
 .admin-logo img {
-  height: 50px;
+  height: 56px;
   width: auto;
   filter: brightness(0) invert(1);
 }
@@ -215,13 +217,6 @@ body {
   color: var(--wood);
 }
 
-/* Details on the left, images on the right once there is room for both. */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0 28px;
-}
-
 .form-footer {
   border-top: 1px solid var(--border);
   margin-top: 1rem;
@@ -235,21 +230,6 @@ body {
 
 .form-actions button {
   flex: 1;
-}
-
-@media (min-width: 900px) {
-  .form-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .form-actions {
-    justify-content: flex-end;
-  }
-
-  .form-actions button {
-    flex: 0 0 auto;
-    min-width: 190px;
-  }
 }
 
 .field-group {
