@@ -41,7 +41,6 @@ const PAGE_SIZE = 24;
 
 const appLoading = document.getElementById("appLoading");
 const appShell = document.getElementById("appShell");
-const adminHeader = document.querySelector(".admin-header");
 const progressContainer = document.getElementById("progressContainer");
 const form = document.getElementById("productForm");
 const container = document.getElementById("adminProductContainer");
@@ -83,16 +82,8 @@ onAuthStateChanged(auth, (user) => {
   }
   appLoading.hidden = true;
   appShell.hidden = false;
-  syncHeaderHeight();
   if (!unsubscribe) subscribeToProducts();
 });
-
-// The form sidebar sticks below the header and sizes itself against it.
-function syncHeaderHeight() {
-  document.documentElement.style.setProperty("--header-h", `${adminHeader.offsetHeight}px`);
-}
-
-window.addEventListener("resize", syncHeaderHeight);
 
 function subscribeToProducts() {
   unsubscribe = onSnapshot(

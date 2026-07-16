@@ -11,8 +11,6 @@
   --success: #1e8449;
   /* Shared height for header controls so the search box and buttons match. */
   --control-h: 42px;
-  /* Real header height, measured by dashboard.js; the value here is a fallback. */
-  --header-h: 82px;
 }
 
 *,
@@ -75,16 +73,20 @@ body {
 .admin-header {
   background: linear-gradient(135deg, var(--wood), var(--copper));
   color: #fff;
-  padding: 1rem 2rem;
+  padding: 1rem 0;
   box-shadow: 0 4px 12px rgba(45, 27, 14, 0.15);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
+/* Same max-width and gutters as .main-layout (and as the client), so the
+   header lines up with the content below at every breakpoint. */
 .header-container {
   max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
+  padding: 0 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -187,29 +189,19 @@ body {
   cursor: progress;
 }
 
+/* The form sits above the catalog at every width: nothing is pinned, so the
+   panel never needs a scrollbar of its own and the actions are always in flow. */
 .main-layout {
   display: flex;
-  max-width: 1400px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  flex-direction: column;
   gap: 2rem;
-  align-items: flex-start;
-}
-
-.form-sidebar {
-  width: 380px;
-  flex-shrink: 0;
-  display: flex;
-  position: sticky;
-  top: calc(var(--header-h) + 1rem);
-  max-height: calc(100vh - var(--header-h) - 2rem);
+  max-width: 1400px;
+  width: 100%;
+  margin: 2rem auto;
+  padding: 0 24px;
 }
 
 .form-card {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-height: 0;
   background: #fff;
   padding: 1.5rem;
   border-radius: 12px;
@@ -218,30 +210,19 @@ body {
 }
 
 .form-card h2 {
-  flex-shrink: 0;
   font-size: 1.15rem;
   margin-bottom: 1.25rem;
   color: var(--wood);
 }
 
-#productForm {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-/* Only the fields scroll, so the actions below stay reachable on any height. */
-.form-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding-right: 6px;
-  margin-right: -6px;
+/* Details on the left, images on the right once there is room for both. */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 28px;
 }
 
 .form-footer {
-  flex-shrink: 0;
   border-top: 1px solid var(--border);
   margin-top: 1rem;
   padding-top: 1rem;
@@ -254,6 +235,21 @@ body {
 
 .form-actions button {
   flex: 1;
+}
+
+@media (min-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-actions {
+    justify-content: flex-end;
+  }
+
+  .form-actions button {
+    flex: 0 0 auto;
+    min-width: 190px;
+  }
 }
 
 .field-group {
@@ -400,7 +396,6 @@ select:focus-visible {
 }
 
 .gallery-section {
-  flex: 1;
   min-width: 0;
 }
 
@@ -471,7 +466,7 @@ select:focus-visible {
 }
 
 .carousel-container {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1;
   position: relative;
   border-radius: 8px;
   overflow: hidden;
@@ -482,7 +477,8 @@ select:focus-visible {
 .carousel-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Images are stored as squares; contain also keeps legacy uploads uncropped. */
+  object-fit: contain;
 }
 
 .c-nav {
@@ -640,12 +636,15 @@ select:focus-visible {
   aspect-ratio: 1;
   border-radius: 4px;
   overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--border);
 }
 
+/* Mirrors how the image is stored: fitted inside a square, never cropped. */
 .preview-item img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .btn-remove-preview {
@@ -692,30 +691,14 @@ select:focus-visible {
   background: #3e2723;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 900px) {
+  .header-container,
   .main-layout {
-    flex-direction: column;
-  }
-
-  /* Stacked: the card flows with the page, so nothing needs to scroll inside. */
-  .form-sidebar {
-    width: 100%;
-    position: static;
-    max-height: none;
-  }
-
-  .form-scroll {
-    overflow: visible;
-    padding-right: 0;
-    margin-right: 0;
+    padding: 0 16px;
   }
 }
 
 @media (max-width: 700px) {
-  .admin-header {
-    padding: 1rem;
-  }
-
   .header-actions {
     justify-content: stretch;
   }
@@ -726,5 +709,12 @@ select:focus-visible {
 
   .field-row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container,
+  .main-layout {
+    padding: 0 12px;
   }
 }
