@@ -13,6 +13,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # TODO: commit a package-lock.json and switch to `npm ci` for reproducible
+      # installs (needs a machine with Node to generate the lockfile).
       - run: npm install
       - run: npm run lint
       - run: npm test

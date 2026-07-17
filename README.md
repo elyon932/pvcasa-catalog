@@ -75,6 +75,25 @@ Products without images fall back to `img/product-placeholder.svg`.
 
 The project is a set of static files. Serve the repository root with any static host or reverse proxy (nginx). Enforce HTTPS and keep `/admin` excluded from search indexing — both admin pages already send `noindex`.
 
+### Cache headers (important)
+
+There is no build step, so the JavaScript modules import each other by fixed path with no content hash. If a deploy serves a **new** module against a **stale cached** one, the page can break for returning visitors (an import may resolve to an old file missing a new export). Serve the app's own files so browsers always revalidate:
+
+- **HTML, CSS, JS:** `Cache-Control: no-cache` (revalidate every load via ETag — the files are tiny, so this is cheap).
+- **Product images:** already uploaded to Firebase Storage with `Cache-Control: public, max-age=31536000, immutable` (filenames are UUIDs, so they never change).
+
+nginx example:
+
+```nginx
+location ~* \.(?:html|css|js)$ { add_header Cache-Control "no-cache"; }
+```
+
+On static hosts (Netlify, Vercel, Firebase Hosting, …) set the equivalent `Cache-Control: no-cache` header for `*.html`, `*.css` and `*.js`.
+
+### Scale note
+
+The catalog client reads the entire `products` collection on load (no `limit`), so Firestore read cost grows with catalog size × traffic. This is fine for the current catalog. If it grows large, enable the SDK's offline persistence or paginate the query with a cursor.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
