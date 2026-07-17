@@ -27,6 +27,27 @@ export function createProductModal({ cart, onAdd }) {
   let index = 0;
   let returnFocus = null;
 
+  // Inline scroll lock (kept local to avoid a shared export whose cached older
+  // copy could break a fresh page after deploy).
+  let scrollLocked = false;
+  let lockedScrollY = 0;
+
+  function lockScroll() {
+    if (scrollLocked) return;
+    scrollLocked = true;
+    lockedScrollY = window.scrollY;
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.classList.add("scroll-locked");
+  }
+
+  function unlockScroll() {
+    if (!scrollLocked) return;
+    scrollLocked = false;
+    document.body.classList.remove("scroll-locked");
+    document.body.style.top = "";
+    window.scrollTo(0, lockedScrollY);
+  }
+
   function galleryImages(entry) {
     return entry.images.length ? entry.images : [PLACEHOLDER_IMAGE];
   }
@@ -45,8 +66,10 @@ export function createProductModal({ cart, onAdd }) {
     dots.replaceChildren(
       ...(multiple
         ? images.map((_, i) => {
-            const dot = document.createElement("span");
+            const dot = document.createElement("button");
+            dot.type = "button";
             dot.className = `pm-dot${i === 0 ? " active" : ""}`;
+            dot.setAttribute("aria-label", `Ir para imagem ${i + 1}`);
             return dot;
           })
         : []),
@@ -80,7 +103,7 @@ export function createProductModal({ cart, onAdd }) {
 
     modal.hidden = false;
     overlay.hidden = false;
-    document.body.classList.add("cart-locked");
+    lockScroll();
     closeButton.focus();
   }
 
@@ -89,7 +112,7 @@ export function createProductModal({ cart, onAdd }) {
     modal.hidden = true;
     overlay.hidden = true;
     product = null;
-    document.body.classList.remove("cart-locked");
+    unlockScroll();
     if (returnFocus && document.contains(returnFocus)) returnFocus.focus();
   }
 

@@ -106,6 +106,7 @@ async function loadProducts() {
   showState("");
 
   try {
+    // orderBy("name") omits any document without a "name" field (Firestore rule).
     const snapshot = await getDocs(query(collection(db, "products"), orderBy("name")));
     products = snapshot.docs
       .map(normalizeProduct)
@@ -158,10 +159,11 @@ function applyUrlParams() {
     checkbox.checked = categories.includes(checkbox.value);
   });
 
-  const price = params.get("price") ?? "all";
-  const priceInput =
-    filtersForm.querySelector(`input[name="price"][value="${price}"]`) ??
-    filtersForm.querySelector('input[name="price"][value="all"]');
+  // Validate against known ranges before building the selector: a forged value
+  // (e.g. ?price=") would otherwise throw in querySelector and kill the module.
+  const priceParam = params.get("price");
+  const price = priceParam && priceParam in PRICE_RANGES ? priceParam : "all";
+  const priceInput = filtersForm.querySelector(`input[name="price"][value="${price}"]`);
   priceInput.checked = true;
 
   const sort = params.get("sort");
@@ -304,6 +306,8 @@ function cartLines() {
     .filter((line) => line.product);
 }
 
+// Note: a very large order produces a long wa.me URL; browsers/WhatsApp cap URL
+// length, so orders with dozens of long-named items could be truncated.
 function orderMessage(lines, total) {
   const items = lines
     .map(
@@ -357,13 +361,38 @@ function renderCart() {
   productModal.syncAdd();
 }
 
+// Inline scroll lock (kept in this module to avoid a shared export whose
+// cached older copy could break a fresh page after deploy).
+let scrollLocked = false;
+let lockedScrollY = 0;
+
+function lockScroll() {
+  if (scrollLocked) return;
+  scrollLocked = true;
+  lockedScrollY = window.scrollY;
+  document.body.style.top = `-${lockedScrollY}px`;
+  document.body.classList.add("scroll-locked");
+}
+
+function unlockScroll() {
+  if (!scrollLocked) return;
+  scrollLocked = false;
+  document.body.classList.remove("scroll-locked");
+  document.body.style.top = "";
+  window.scrollTo(0, lockedScrollY);
+}
+
 function setCartOpen(open) {
   cartDrawer.hidden = !open;
   cartOverlay.hidden = !open;
   cartToggle.setAttribute("aria-expanded", String(open));
-  document.body.classList.toggle("cart-locked", open);
-  if (open) cartClose.focus();
-  else cartToggle.focus();
+  if (open) {
+    lockScroll();
+    cartClose.focus();
+  } else {
+    unlockScroll();
+    cartToggle.focus();
+  }
 }
 
 cartToggle.addEventListener("click", () => setCartOpen(cartDrawer.hidden));

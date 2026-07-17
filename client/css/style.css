@@ -23,10 +23,10 @@
   display: none !important;
 }
 
-/* Reserve the scrollbar track at all times: locking the body when the cart or
-   the product modal opens then removes no width, so nothing shifts. */
+/* Always render the scrollbar track. Locking the body (position: fixed) then
+   removes no width and leaves no empty gutter, so nothing shifts sideways. */
 html {
-  scrollbar-gutter: stable;
+  overflow-y: scroll;
 }
 
 body {
@@ -757,8 +757,13 @@ img {
   margin-top: 0;
 }
 
-body.cart-locked {
-  overflow: hidden;
+/* Pinning the body (top set inline to -scrollY) freezes the page while a
+   dialog is open, keeping the html scrollbar rendered so nothing reflows. */
+body.scroll-locked {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
 }
 
 .product-modal-overlay {
@@ -858,8 +863,11 @@ body.cart-locked {
 .pm-dot {
   width: 8px;
   height: 8px;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
 }
 
 .pm-dot.active {
