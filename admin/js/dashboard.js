@@ -73,6 +73,7 @@ let objectUrls = [];
 let searchTerm = "";
 let visibleCount = PAGE_SIZE;
 let unsubscribe = null;
+let saving = false;
 
 // The shell stays hidden until the session is known, so an unauthenticated
 // visitor never sees the panel before being sent to the login page.
@@ -88,6 +89,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 function subscribeToProducts() {
+  // orderBy("updatedAt") omits docs without that field (every write sets it).
   unsubscribe = onSnapshot(
     query(collection(db, "products"), orderBy("updatedAt", "desc")),
     (snapshot) => {
@@ -182,14 +184,15 @@ function buildPreviewItem(source, onRemove) {
 
 // Each source is converted to WebP, uploaded to Storage, and resolved to its
 // CDN download URL — the URL is what gets indexed on the product document.
-async function uploadSelectedFiles() {
-  const urls = [];
-  const total = selectedFiles.length;
+// Resolved URLs are pushed into `urls` as they land, so a failure mid-loop
+// still lets the caller clean up whatever already reached Storage.
+async function uploadSelectedFiles(files, urls) {
+  const total = files.length;
 
   progressContainer.hidden = false;
   progressBar.style.width = "0%";
 
-  for (const [index, file] of selectedFiles.entries()) {
+  for (const [index, file] of files.entries()) {
     showFormMessage(`Otimizando imagem ${index + 1} de ${total}...`);
     const { data, contentType, extension } = await optimizeImage(file);
 
@@ -207,8 +210,6 @@ async function uploadSelectedFiles() {
     urls.push(await getDownloadURL(storageRef));
     progressBar.style.width = `${((index + 1) / total) * 100}%`;
   }
-
-  return urls;
 }
 
 async function deleteImages(urls) {
@@ -224,27 +225,33 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
+  // Snapshot every field and file list before any await: editing another
+  // product mid-save cannot then mix its values into this write.
   const productId = productIdInput.value;
+  const discount = Number(discountInput.value) || 0;
+  const data = {
+    name: nameInput.value.trim(),
+    category: categorySelect.value,
+    basePrice,
+    discount,
+    finalPrice: finalPriceOf(basePrice, discount),
+    updatedAt: Date.now(),
+  };
+  const keptImages = [...existingImages];
+  const imagesToRemove = [...removedImages];
+  const filesToUpload = [...selectedFiles];
+
+  saving = true;
   submitButton.disabled = true;
   const originalLabel = submitButton.textContent;
   submitButton.textContent = "Sincronizando...";
   showFormMessage("");
 
-  let uploadedImages = [];
+  const uploadedImages = [];
 
   try {
-    uploadedImages = selectedFiles.length ? await uploadSelectedFiles() : [];
-    const discount = Number(discountInput.value) || 0;
-
-    const data = {
-      name: nameInput.value.trim(),
-      category: categorySelect.value,
-      basePrice,
-      discount,
-      finalPrice: finalPriceOf(basePrice, discount),
-      images: [...existingImages, ...uploadedImages],
-      updatedAt: Date.now(),
-    };
+    if (filesToUpload.length) await uploadSelectedFiles(filesToUpload, uploadedImages);
+    data.images = [...keptImages, ...uploadedImages];
 
     if (productId) {
       await updateDoc(doc(db, "products", productId), data);
@@ -252,13 +259,14 @@ form.addEventListener("submit", async (event) => {
       await addDoc(collection(db, "products"), { ...data, createdAt: Date.now() });
     }
 
-    await deleteImages(removedImages);
+    await deleteImages(imagesToRemove);
     resetForm();
     showFormMessage(productId ? "Produto atualizado." : "Produto registrado.");
   } catch (error) {
     await deleteImages(uploadedImages);
     showFormMessage(`Falha ao salvar: ${error.message}`, true);
   } finally {
+    saving = false;
     progressContainer.hidden = true;
     progressBar.style.width = "0%";
     submitButton.disabled = false;
@@ -327,7 +335,7 @@ function buildProductCard(product) {
       ${images.length > 1 ? '<button type="button" class="c-nav c-prev" aria-label="Imagem anterior">‹</button>' : ""}
       <img class="carousel-img" src="${escapeHtml(images[0])}" alt="${escapeHtml(product.name)}" loading="lazy">
       ${images.length > 1 ? '<button type="button" class="c-nav c-next" aria-label="Próxima imagem">›</button>' : ""}
-      ${images.length > 1 ? `<div class="carousel-dots">${images.map((_, index) => `<span class="dot${index === 0 ? " active" : ""}"></span>`).join("")}</div>` : ""}
+      ${images.length > 1 ? `<div class="carousel-dots">${images.map((_, index) => `<button type="button" class="dot${index === 0 ? " active" : ""}" aria-label="Ir para imagem ${index + 1}"></button>`).join("")}</div>` : ""}
     </div>
     <div class="card-info">
       <div class="tags">
@@ -366,9 +374,11 @@ function setupCarousel(card, images) {
 
   card.querySelector(".c-prev").addEventListener("click", () => goTo(index - 1));
   card.querySelector(".c-next").addEventListener("click", () => goTo(index + 1));
+  dots.forEach((dot, target) => dot.addEventListener("click", () => goTo(target)));
 }
 
 function editProduct(id) {
+  if (saving) return;
   const product = allProducts.find((entry) => entry.id === id);
   if (!product) return;
 
@@ -392,6 +402,7 @@ function editProduct(id) {
 }
 
 async function removeProduct(id) {
+  if (saving) return;
   const product = allProducts.find((entry) => entry.id === id);
   if (!product || !window.confirm(`Excluir "${product.name}" permanentemente?`)) return;
 
@@ -416,8 +427,14 @@ loadMoreButton.addEventListener("click", () => {
 });
 
 logoutButton.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.replace(AUTH_URL);
+  logoutButton.disabled = true;
+  try {
+    await signOut(auth);
+    window.location.replace(AUTH_URL);
+  } catch (error) {
+    showFormMessage(`Não foi possível sair: ${error.message}`, true);
+    logoutButton.disabled = false;
+  }
 });
 
 updatePricePreview();

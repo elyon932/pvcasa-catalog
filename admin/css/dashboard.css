@@ -24,10 +24,10 @@
   display: none !important;
 }
 
-/* Reserve the scrollbar track so filtering the grid down to a short page
-   does not shift the layout sideways. */
+/* Always render the scrollbar track, so filtering the grid down to a short
+   page neither shifts the layout nor leaves an empty gutter strip. */
 html {
-  scrollbar-gutter: stable;
+  overflow-y: scroll;
 }
 
 body {
@@ -502,8 +502,11 @@ select:focus-visible {
 .dot {
   width: 8px;
   height: 8px;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
   transition: width 0.2s ease;
 }
 
