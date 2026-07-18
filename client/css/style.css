@@ -632,6 +632,7 @@ img {
   padding: 0 20px;
   margin: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   flex: 1;
 }
 
@@ -757,15 +758,6 @@ img {
   margin-top: 0;
 }
 
-/* Pinning the body (top set inline to -scrollY) freezes the page while a
-   dialog is open, keeping the html scrollbar rendered so nothing reflows. */
-body.scroll-locked {
-  position: fixed;
-  left: 0;
-  right: 0;
-  width: 100%;
-}
-
 .product-modal-overlay {
   position: fixed;
   inset: 0;
@@ -882,6 +874,7 @@ body.scroll-locked {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .pm-name {

@@ -361,25 +361,28 @@ function renderCart() {
   productModal.syncAdd();
 }
 
-// Inline scroll lock (kept in this module to avoid a shared export whose
-// cached older copy could break a fresh page after deploy).
+// Freeze the page while the cart is open by blocking scroll gestures that fall
+// outside its own list — the real scroll position never changes, so the native
+// scrollbar stays visible where it was. (Inline to avoid a shared export whose
+// cached older copy could break a fresh page after deploy.)
 let scrollLocked = false;
-let lockedScrollY = 0;
+
+function blockScroll(event) {
+  if (!cartItems.contains(event.target)) event.preventDefault();
+}
 
 function lockScroll() {
   if (scrollLocked) return;
   scrollLocked = true;
-  lockedScrollY = window.scrollY;
-  document.body.style.top = `-${lockedScrollY}px`;
-  document.body.classList.add("scroll-locked");
+  window.addEventListener("wheel", blockScroll, { passive: false });
+  window.addEventListener("touchmove", blockScroll, { passive: false });
 }
 
 function unlockScroll() {
   if (!scrollLocked) return;
   scrollLocked = false;
-  document.body.classList.remove("scroll-locked");
-  document.body.style.top = "";
-  window.scrollTo(0, lockedScrollY);
+  window.removeEventListener("wheel", blockScroll, { passive: false });
+  window.removeEventListener("touchmove", blockScroll, { passive: false });
 }
 
 function setCartOpen(open) {

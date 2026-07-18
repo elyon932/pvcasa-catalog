@@ -27,25 +27,29 @@ export function createProductModal({ cart, onAdd }) {
   let index = 0;
   let returnFocus = null;
 
-  // Inline scroll lock (kept local to avoid a shared export whose cached older
-  // copy could break a fresh page after deploy).
+  // Freeze the page while the modal is open by blocking scroll gestures that
+  // fall outside its info panel — the real scroll position never changes, so
+  // the native scrollbar stays visible. (Inline to avoid a shared export whose
+  // cached older copy could break a fresh page after deploy.)
+  const info = modal.querySelector(".pm-info");
   let scrollLocked = false;
-  let lockedScrollY = 0;
+
+  function blockScroll(event) {
+    if (!info.contains(event.target)) event.preventDefault();
+  }
 
   function lockScroll() {
     if (scrollLocked) return;
     scrollLocked = true;
-    lockedScrollY = window.scrollY;
-    document.body.style.top = `-${lockedScrollY}px`;
-    document.body.classList.add("scroll-locked");
+    window.addEventListener("wheel", blockScroll, { passive: false });
+    window.addEventListener("touchmove", blockScroll, { passive: false });
   }
 
   function unlockScroll() {
     if (!scrollLocked) return;
     scrollLocked = false;
-    document.body.classList.remove("scroll-locked");
-    document.body.style.top = "";
-    window.scrollTo(0, lockedScrollY);
+    window.removeEventListener("wheel", blockScroll, { passive: false });
+    window.removeEventListener("touchmove", blockScroll, { passive: false });
   }
 
   function galleryImages(entry) {
