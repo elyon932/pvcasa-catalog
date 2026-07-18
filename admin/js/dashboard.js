@@ -32,6 +32,7 @@ import {
 import { maskMoney, maskPercent, parseMoney } from "../../shared/money.js";
 import { debounce } from "../../shared/debounce.js";
 import { gridColumnCount, rowAlignedCount } from "../../shared/grid.js";
+import { CATALOG_PATH, catalogUrl, toFeedProduct } from "../../shared/feed.js";
 import { optimizeImage } from "./image.js";
 
 const AUTH_URL = "../auth/";
@@ -74,6 +75,7 @@ let searchTerm = "";
 let visibleCount = PAGE_SIZE;
 let unsubscribe = null;
 let saving = false;
+let catalogChecked = false;
 
 // The shell stays hidden until the session is known, so an unauthenticated
 // visitor never sees the panel before being sent to the login page.
@@ -95,6 +97,13 @@ function subscribeToProducts() {
     (snapshot) => {
       allProducts = snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() }));
       renderProducts();
+      // Publishing from the snapshot (not from the save handler) guarantees the
+      // feed always mirrors what Firestore actually holds.
+      if (catalogChecked) schedulePublish();
+      else {
+        catalogChecked = true;
+        publishCatalogIfStale().catch((error) => console.error("Catalog publish failed:", error));
+      }
     },
     () => showFormMessage("Não foi possível carregar os produtos.", true),
   );
@@ -210,6 +219,47 @@ async function uploadSelectedFiles(files, urls) {
     urls.push(await getDownloadURL(storageRef));
     progressBar.style.width = `${((index + 1) / total) * 100}%`;
   }
+}
+
+// Publishes the catalog visitors actually read. Keeping it in Storage means the
+// public site costs zero Firestore reads; it is rewritten after every change.
+async function publishCatalog() {
+  const feed = {
+    generatedAt: Date.now(),
+    count: allProducts.length,
+    maxUpdatedAt: latestUpdatedAt(),
+    products: allProducts.map(toFeedProduct),
+  };
+
+  const body = new Blob([JSON.stringify(feed)], { type: "application/json" });
+  await uploadBytes(ref(storage, CATALOG_PATH), body, {
+    contentType: "application/json",
+    cacheControl: "public, max-age=300",
+  });
+}
+
+// Debounced so a burst of edits results in a single upload.
+const schedulePublish = debounce(() => {
+  publishCatalog().catch((error) => console.error("Catalog publish failed:", error));
+}, 1500);
+
+function latestUpdatedAt() {
+  return allProducts.reduce((latest, product) => Math.max(latest, Number(product.updatedAt) || 0), 0);
+}
+
+// Self-healing: if the published feed is missing or behind (e.g. it was never
+// generated, or a publish failed), rewrite it once when the panel loads.
+async function publishCatalogIfStale() {
+  try {
+    const response = await fetch(catalogUrl(), { cache: "no-store" });
+    if (response.ok) {
+      const feed = await response.json();
+      if (feed?.count === allProducts.length && feed?.maxUpdatedAt === latestUpdatedAt()) return;
+    }
+  } catch {
+    // Unreachable feed: fall through and republish.
+  }
+  await publishCatalog();
 }
 
 async function deleteImages(urls) {

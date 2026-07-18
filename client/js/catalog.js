@@ -15,6 +15,7 @@ import {
   primaryImage,
 } from "../../shared/catalog.js";
 import { WHATSAPP_NUMBER } from "../../shared/config.js";
+import { catalogUrl } from "../../shared/feed.js";
 import { debounce } from "../../shared/debounce.js";
 import { gridColumnCount, rowAlignedCount } from "../../shared/grid.js";
 import { createCart } from "./cart.js";
@@ -82,13 +83,12 @@ function showState(message, { clearable = false } = {}) {
   stateAction.hidden = !clearable;
 }
 
-function normalizeProduct(entry) {
-  const data = entry.data();
+function normalizeProduct(id, data) {
   const basePrice = Number(data.basePrice) || 0;
   const discount = Number(data.discount) || 0;
 
   return {
-    id: entry.id,
+    id,
     name: String(data.name ?? "").trim(),
     category: data.category ?? "decoracao",
     basePrice,
@@ -100,16 +100,32 @@ function normalizeProduct(entry) {
   };
 }
 
+// Published JSON first (CDN-cached, no Firestore reads). Falls back to querying
+// Firestore so the catalog still works if the feed is missing or unreachable.
+async function fetchProducts() {
+  try {
+    const response = await fetch(catalogUrl());
+    if (response.ok) {
+      const feed = await response.json();
+      if (Array.isArray(feed?.products) && feed.products.length) {
+        return feed.products.map((product) => normalizeProduct(product.id, product));
+      }
+    }
+  } catch (error) {
+    console.warn("Catalog feed unavailable, falling back to Firestore:", error);
+  }
+
+  // orderBy("name") omits any document without a "name" field (Firestore rule).
+  const snapshot = await getDocs(query(collection(db, "products"), orderBy("name")));
+  return snapshot.docs.map((entry) => normalizeProduct(entry.id, entry.data()));
+}
+
 async function loadProducts() {
   renderSkeletons(container);
   showState("");
 
   try {
-    // orderBy("name") omits any document without a "name" field (Firestore rule).
-    const snapshot = await getDocs(query(collection(db, "products"), orderBy("name")));
-    products = snapshot.docs
-      .map(normalizeProduct)
-      .filter((product) => product.name);
+    products = (await fetchProducts()).filter((product) => product.name);
     productsById = new Map(products.map((product) => [product.id, product]));
     cart.prune(productsById);
     applyFilters();

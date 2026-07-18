@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyACAp-gYI8FF6HiklK2x18kmh6itBoJoaY",
   authDomain: "pvcasa-3d536.firebaseapp.com",
   projectId: "pvcasa-3d536",
