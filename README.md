@@ -29,7 +29,7 @@ Code, filenames, and identifiers are in English. The user interface is in Brazil
 
 ## Tech Stack
 
-HTML, CSS, JavaScript (ES modules, no build step), Firebase Authentication, Cloud Firestore, Firebase Storage.
+HTML, CSS, JavaScript (ES modules), bundled with Vite. Firebase Authentication, Cloud Firestore, Firebase Storage.
 
 ## Project Structure
 
@@ -62,11 +62,13 @@ Products without images fall back to `img/product-placeholder.svg`.
 
 ## Setup
 
-1. Serve the repository root over HTTP (all paths are relative, so any static server or subpath works; ES modules do not run from `file://`):
+1. Install dependencies and start a dev server (each app runs on its own):
    ```bash
-   npx serve .
+   npm install
+   npm run dev         # catalog    → http://localhost:5173/
+   npm run dev:admin   # admin panel → http://localhost:5173/auth/
    ```
-   Open the catalog at `/client/` and the admin panel at `/admin/auth/`. In production each app is served at the root of its own domain — see [Deployment](#deployment).
+   In production each app is served at the root of its own domain — see [Deployment](#deployment).
 2. In the Firebase console, add the serving domain to **Authentication → Settings → Authorized domains** and create an admin user under **Authentication → Users**.
 3. Configure the Firestore and Storage security rules in the Firebase console: allow public reads of `products` and restrict all writes to authorized admin users.
 4. Sign in to the admin panel to manage the catalog.
@@ -78,11 +80,9 @@ The project is a set of static files split into two independent apps — `client
 - `pvcasa.com.br/` → serves `client/index.html` (no `/client` in the URL)
 - `admin.pvcasa.com.br/auth`, `/dashboard` → serve `admin/` (no `/admin` in the URL)
 
-Every asset is referenced by relative path, so the URLs a page requests normalize to `/css`, `/js`, `/img` and `/shared` at the web root. Each domain therefore only needs its subfolder served at `/` with `img/` and `shared/` alongside — **no code changes required**.
-
 ### Build
 
-`npm run build` assembles `dist/client` and `dist/admin` — each app's subfolder plus `img/` and `shared/` copied in, ready to serve at a domain root. `dist/` is git-ignored.
+`npm run build` runs Vite once per app — `vite build client` and `vite build admin` share [`vite.config.js`](vite.config.js), which picks the app from the CLI root argument. Each build emits a self-contained web root (`dist/client`, `dist/admin`) with hashed, minified assets under `assets/`; shared modules are deduplicated by the bundler instead of being copied. `dist/` is git-ignored.
 
 ### Firebase Hosting (recommended)
 
@@ -106,13 +106,11 @@ npm run deploy   # runs the build, then firebase deploy --only hosting
 
 ### Cache headers
 
-The build only copies files, so the JS modules still import each other by fixed path with no content hash. If a deploy served a **new** module against a **stale cached** one, the page could break for returning visitors (an import resolving to an old file missing a new export). `firebase.json` prevents this by making browsers revalidate:
+Every built asset carries a content hash in its filename, so a new deploy produces new filenames and can never mix with a stale cached module. `firebase.json` therefore caches aggressively:
 
-- **HTML, CSS, JS:** `Cache-Control: no-cache` (revalidate every load via ETag — the files are tiny).
-- **Local images** (logo, favicon, placeholder): `public, max-age=86400`.
-- **Product images:** served from Firebase Storage with `public, max-age=31536000, immutable` (filenames are UUIDs, so they never change).
-
-For an nginx reverse proxy instead, apply the same `no-cache` to `*.html|css|js` and map each domain's subfolder to `/`.
+- **HTML:** `Cache-Control: no-cache` — the only file whose name is stable, so it must revalidate to pick up new asset references.
+- **`/assets/**`:** `public, max-age=31536000, immutable` — hashed, safe to cache forever.
+- **Product images:** served from Firebase Storage with the same immutable policy (filenames are UUIDs).
 
 ### Scale note
 
