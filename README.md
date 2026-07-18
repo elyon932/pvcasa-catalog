@@ -96,7 +96,15 @@ firebase target:apply hosting client pvcasa-client
 firebase target:apply hosting admin pvcasa-admin
 ```
 
-Then connect the custom domains in the Firebase console (`pvcasa.com.br` → client site, `admin.pvcasa.com.br` → admin site). To ship:
+Then connect the custom domains in the Firebase console (`pvcasa.com.br` → client site, `admin.pvcasa.com.br` → admin site).
+
+### Continuous deployment
+
+Pushing to `main` ships automatically: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, tests and the build, and only then deploys both sites. A failing check blocks the deploy, so a red build never reaches production. Pull requests run the same checks without deploying.
+
+The workflow authenticates with a Firebase service account stored as the repository secret `FIREBASE_SERVICE_ACCOUNT_PVCASA_3D536` (created by `firebase init hosting:github`).
+
+To ship manually — useful for a hotfix or when the workflow is unavailable:
 
 ```bash
 npm run deploy   # runs the build, then firebase deploy --only hosting

@@ -1,12 +1,20 @@
-name: CI
+name: CI/CD
 
 on:
   push:
     branches: [main]
   pull_request:
 
+# A newer push supersedes an in-flight run for the same branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  checks:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,3 +26,34 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+
+  # Only reached when verify passes, and only for pushes to main — so a red
+  # build can never reach production.
+  deploy:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      - name: Deploy catalog
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PVCASA_3D536 }}
+          projectId: pvcasa-3d536
+          target: client
+          channelId: live
+
+      - name: Deploy admin
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PVCASA_3D536 }}
+          projectId: pvcasa-3d536
+          target: admin
+          channelId: live
