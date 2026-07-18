@@ -5,7 +5,7 @@ import {
   formatCurrency,
   PLACEHOLDER_IMAGE,
 } from "../../shared/catalog.js";
-import { trapFocus } from "./dom.js";
+import { swapToPlaceholder, trapFocus } from "./dom.js";
 
 // Product detail dialog with an image gallery. `cart` is the shared cart
 // instance; `onAdd` fires after a product is added (used to bump the FAB).
@@ -58,6 +58,8 @@ export function createProductModal({ cart, onAdd }) {
 
   function showImage(next) {
     index = (next + images.length) % images.length;
+    // Re-arm the fallback guard: this is an intentional image change.
+    delete image.dataset.fallback;
     image.src = images[index];
     dots.querySelectorAll(".pm-dot").forEach((dot, i) => dot.classList.toggle("active", i === index));
   }
@@ -133,9 +135,7 @@ export function createProductModal({ cart, onAdd }) {
   overlay.addEventListener("click", close);
   prevButton.addEventListener("click", () => showImage(index - 1));
   nextButton.addEventListener("click", () => showImage(index + 1));
-  image.addEventListener("error", () => {
-    image.src = PLACEHOLDER_IMAGE;
-  });
+  image.addEventListener("error", () => swapToPlaceholder(image));
   dots.addEventListener("click", (event) => {
     const target = [...dots.querySelectorAll(".pm-dot")].indexOf(event.target);
     if (target >= 0) showImage(target);

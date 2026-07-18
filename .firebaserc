@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "pvcasa-3d536"
-  }
+  },
+  "targets": {
+    "pvcasa-3d536": {
+      "hosting": {
+        "client": [
+          "pvcasa-client"
+        ],
+        "admin": [
+          "pvcasa-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

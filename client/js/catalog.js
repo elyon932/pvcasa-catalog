@@ -12,14 +12,13 @@ import {
   finalPriceOf,
   formatCurrency,
   normalizeText,
-  PLACEHOLDER_IMAGE,
   primaryImage,
 } from "../../shared/catalog.js";
 import { WHATSAPP_NUMBER } from "../../shared/config.js";
 import { debounce } from "../../shared/debounce.js";
 import { gridColumnCount, rowAlignedCount } from "../../shared/grid.js";
 import { createCart } from "./cart.js";
-import { renderSkeletons, trapFocus } from "./dom.js";
+import { renderSkeletons, swapToPlaceholder, trapFocus } from "./dom.js";
 import { createProductModal } from "./product-modal.js";
 
 const PAGE_SIZE = 24;
@@ -205,9 +204,7 @@ function buildProductCard(product) {
   `;
 
   const image = card.querySelector("img");
-  image.addEventListener("error", () => {
-    image.src = PLACEHOLDER_IMAGE;
-  });
+  image.addEventListener("error", () => swapToPlaceholder(image));
 
   card.querySelector(".card-image").addEventListener("click", () => productModal.open(product));
 
@@ -335,9 +332,7 @@ function buildCartItem({ product, quantity }) {
     </div>
   `;
 
-  item.querySelector("img").addEventListener("error", (event) => {
-    event.target.src = PLACEHOLDER_IMAGE;
-  });
+  item.querySelector("img").addEventListener("error", (event) => swapToPlaceholder(event.target));
   item.querySelector(".qty-down").addEventListener("click", () => cart.setQuantity(product.id, quantity - 1));
   item.querySelector(".qty-up").addEventListener("click", () => cart.setQuantity(product.id, quantity + 1));
   item.querySelector(".cart-item-remove").addEventListener("click", () => cart.remove(product.id));
