@@ -7,18 +7,18 @@ import {
   orderBy,
   query,
   updateDoc,
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+} from "firebase/firestore";
 import {
   deleteObject,
   getDownloadURL,
   ref,
   uploadBytes,
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+} from "firebase/storage";
 
 import {
   onAuthStateChanged,
   signOut,
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+} from "firebase/auth";
 
 import { auth, db, storage } from "../../shared/firebase.js";
 import {

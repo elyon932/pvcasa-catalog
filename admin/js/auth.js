@@ -1,7 +1,7 @@
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+} from "firebase/auth";
 import { auth } from "../../shared/firebase.js";
 
 const DASHBOARD_URL = "../dashboard/";

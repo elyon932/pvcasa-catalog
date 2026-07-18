@@ -3,15 +3,21 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "vite client -c vite.config.js",
+    "dev:admin": "vite admin -c vite.config.js",
     "test": "vitest run",
     "lint": "eslint .",
-    "build": "node scripts/build.mjs",
+    "build": "vite build client -c vite.config.js && vite build admin -c vite.config.js",
     "deploy": "npm run build && firebase deploy --only hosting"
+  },
+  "dependencies": {
+    "firebase": "12.7.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "eslint": "^9.0.0",
     "globals": "^15.0.0",
+    "vite": "^7.0.0",
     "vitest": "^3.0.0"
   }
 }

@@ -3,7 +3,7 @@ import {
   getDocs,
   orderBy,
   query,
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+} from "firebase/firestore";
 import { db } from "../../shared/firebase.js";
 import {
   categoryLabel,
