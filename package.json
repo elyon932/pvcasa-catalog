@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build": "node scripts/build.mjs",
+    "deploy": "npm run build && firebase deploy --only hosting"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

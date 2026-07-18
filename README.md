@@ -66,29 +66,53 @@ Products without images fall back to `img/product-placeholder.svg`.
    ```bash
    npx serve .
    ```
-   The root redirects to the catalog at `/client/`; the admin panel is at `/admin/auth/`.
+   Open the catalog at `/client/` and the admin panel at `/admin/auth/`. In production each app is served at the root of its own domain — see [Deployment](#deployment).
 2. In the Firebase console, add the serving domain to **Authentication → Settings → Authorized domains** and create an admin user under **Authentication → Users**.
 3. Configure the Firestore and Storage security rules in the Firebase console: allow public reads of `products` and restrict all writes to authorized admin users.
 4. Sign in to the admin panel to manage the catalog.
 
 ## Deployment
 
-The project is a set of static files. Serve the repository root with any static host or reverse proxy (nginx). Enforce HTTPS and keep `/admin` excluded from search indexing — both admin pages already send `noindex`.
+The project is a set of static files split into two independent apps — `client/` (public catalog) and `admin/` (management panel) — that share `shared/` and `img/`. Each app is served at the root of its own domain, hiding the internal folders:
 
-### Cache headers (important)
+- `pvcasa.com.br/` → serves `client/index.html` (no `/client` in the URL)
+- `admin.pvcasa.com.br/auth`, `/dashboard` → serve `admin/` (no `/admin` in the URL)
 
-There is no build step, so the JavaScript modules import each other by fixed path with no content hash. If a deploy serves a **new** module against a **stale cached** one, the page can break for returning visitors (an import may resolve to an old file missing a new export). Serve the app's own files so browsers always revalidate:
+Every asset is referenced by relative path, so the URLs a page requests normalize to `/css`, `/js`, `/img` and `/shared` at the web root. Each domain therefore only needs its subfolder served at `/` with `img/` and `shared/` alongside — **no code changes required**.
 
-- **HTML, CSS, JS:** `Cache-Control: no-cache` (revalidate every load via ETag — the files are tiny, so this is cheap).
-- **Product images:** already uploaded to Firebase Storage with `Cache-Control: public, max-age=31536000, immutable` (filenames are UUIDs, so they never change).
+### Build
 
-nginx example:
+`npm run build` assembles `dist/client` and `dist/admin` — each app's subfolder plus `img/` and `shared/` copied in, ready to serve at a domain root. `dist/` is git-ignored.
 
-```nginx
-location ~* \.(?:html|css|js)$ { add_header Cache-Control "no-cache"; }
+### Firebase Hosting (recommended)
+
+One Firebase project serves both apps as two Hosting sites. First-time setup:
+
+```bash
+firebase login
+firebase hosting:sites:create pvcasa-client
+firebase hosting:sites:create pvcasa-admin
+firebase target:apply hosting client pvcasa-client
+firebase target:apply hosting admin pvcasa-admin
 ```
 
-On static hosts (Netlify, Vercel, Firebase Hosting, …) set the equivalent `Cache-Control: no-cache` header for `*.html`, `*.css` and `*.js`.
+Then connect the custom domains in the Firebase console (`pvcasa.com.br` → client site, `admin.pvcasa.com.br` → admin site). To ship:
+
+```bash
+npm run deploy   # runs the build, then firebase deploy --only hosting
+```
+
+`firebase.json` maps the `client`/`admin` targets, redirects the admin root to `/auth`, and sets the cache headers below. TLS and the global CDN are automatic. The admin pages already send `noindex`.
+
+### Cache headers
+
+The build only copies files, so the JS modules still import each other by fixed path with no content hash. If a deploy served a **new** module against a **stale cached** one, the page could break for returning visitors (an import resolving to an old file missing a new export). `firebase.json` prevents this by making browsers revalidate:
+
+- **HTML, CSS, JS:** `Cache-Control: no-cache` (revalidate every load via ETag — the files are tiny).
+- **Local images** (logo, favicon, placeholder): `public, max-age=86400`.
+- **Product images:** served from Firebase Storage with `public, max-age=31536000, immutable` (filenames are UUIDs, so they never change).
+
+For an nginx reverse proxy instead, apply the same `no-cache` to `*.html|css|js` and map each domain's subfolder to `/`.
 
 ### Scale note
 
